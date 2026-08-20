@@ -270,7 +270,8 @@ def test_config_only_prs_are_never_cleared(monkeypatch):
     monkeypatch.setattr(tri, "_pr_files", fake_files)
     r = tri.triage("https://github.com/o/r/pull/11")
     assert r.tier == "needs-human"
-    assert "test-execution configuration" in r.blurb
+    assert "influences the test pipeline" in r.blurb
+    assert "continuous-integration" in r.blurb
 
     def fake_docs(slug, number, token=None):
         return ["README.md", "docs/guide.md"], True

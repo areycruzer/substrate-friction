@@ -14,7 +14,7 @@ this project exists to object to.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import networkx as nx
@@ -42,6 +42,7 @@ class LiveGate:
     verdict: GateVerdict
     prior_n: int
     prior_note: str
+    evidence: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
 
 def _is_test(node: str) -> bool:
@@ -120,7 +121,35 @@ def gate_repo(repo: Path, changed_files: list[str], arm: str = "arm_a",
     test_ids = {node_id for name, node_id in index.items() if _is_test(name)}
     by_id = {v: k_ for k_, v in index.items()}
 
+    by_id = {v: k_ for k_, v in index.items()}
     result = select_tests(g, changed_ids, test_ids, k)
+    # evidence chains: per selected test, the shortest call path from a
+    # changed symbol to it (test -> ... -> change), reconstructed from a
+    # parent-BFS over the same predecessor walk the selector used.
+    parent: dict[int, int] = {}
+    frontier = {c for c in changed_ids if c in g}
+    visited = set(frontier)
+    for _ in range(k):
+        nxt = set()
+        for u in frontier:
+            for v in g.predecessors(u):
+                if v not in visited:
+                    visited.add(v)
+                    parent[v] = u
+                    nxt.add(v)
+        if not nxt:
+            break
+        frontier = nxt
+    evidence: dict[str, tuple[str, ...]] = {}
+    for t in result.selected:
+        chain = [t]
+        cur = t
+        while cur in parent:
+            cur = parent[cur]
+            chain.append(cur)
+        chain.reverse()              # change -> ... -> test
+        evidence[by_id.get(t, str(t))] = tuple(by_id.get(n, str(n))
+                                               for n in chain)
 
     # Staleness fingerprint: a verdict is about THIS graph of THIS commit.
     # Consumers can detect a stale answer by re-hashing.
@@ -168,6 +197,7 @@ def gate_repo(repo: Path, changed_files: list[str], arm: str = "arm_a",
         changed_symbols=len(changed_ids),
         total_tests=len(test_ids),
         selected_tests=tuple(sorted(by_id[i] for i in result.selected)),
+        evidence=evidence,
         graph_complete=result.graph_complete,
         unmatched_changed=tuple(sorted(wanted - matched)),
         verdict=verdict,

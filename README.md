@@ -158,6 +158,8 @@ friction gate --arm arm_b                    # the verdict (exit 1: RUN_FULL)
 friction gate --instance django__django-11551 --live   # engine executes it, parity asserted
 friction diff --live                         # the anti-join, in-engine
 friction gate --distance                     # every class's distance from the bar — the chances, computed
+friction run --repo /tmp/fastapi --changed fastapi/routing.py   # the executor: selected few + full-suite fallback, always together
+friction verify --certificate cert.json      # a build certificate: figures, artifact digest, head, timestamp
 friction verify                              # re-derive every shipped figure
 ```
 
@@ -212,6 +214,13 @@ radius, selected tests, prior and bound), `triage/needs-human` (the gate is
 blind on this change: unresolved files, no tests, or a truncated walk), and
 `triage/out-of-scope` (no Python signal — no clone, no graph, ~1 s). This
 repository dogfoods the action on its own PRs (`.github/workflows/triage.yml`).
+Every comment now carries a **snapshot id** (graph digest @ commit — same
+pair, same verdict; drift means re-triage), **evidence chains** (the actual
+change → … → test call path per selected test), ranked tests-to-watch, a
+generated-file provenance warning, and the **runnable pytest command** for
+the selected few beside the full-suite fallback. One invariant underneath it
+all: *no test is skipped on an unmeasured graph — the gate re-proves it on
+every PR.*
 
 Two scope statements, so nothing overreads: *autonomy* here means autonomous
 **test selection** on a proven graph class — nothing is claimed about

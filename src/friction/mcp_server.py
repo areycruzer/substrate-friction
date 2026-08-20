@@ -108,8 +108,58 @@ def gate_explain(instance_ids: list[str], arm: str = "arm_b",
     return json.dumps(out, indent=2)
 
 
+def route(question: str) -> str:
+    """Which tool answers this question? Cheap probe first, escalate second,
+    abstain last — the routing order itself is the discipline.
+
+    Graph/edge/symbol questions -> graph_query. Skip-safety questions ->
+    gate_check. Anything else -> an honest abstain with both options named.
+    """
+    q = question.lower()
+    if any(w in q for w in ("edge", "symbol", "graph", "call", "calls",
+                            "confirmed", "trust")):
+        return json.dumps({"route": "graph_query",
+                           "why": "structural question — the certified graph "
+                                  "answers it with per-edge trust labels"})
+    if any(w in q for w in ("skip", "safe", "run all", "test selection",
+                            "subset")):
+        return json.dumps({"route": "gate_check",
+                           "why": "selection-safety question — the measured "
+                                  "gate answers it"})
+    return json.dumps({"route": "abstain",
+                       "why": "not a graph or selection-safety question",
+                       "options": ["graph_query", "gate_check"]})
+
+
+def context_pack(changed: list[str]) -> str:
+    """A token-budgeted context pack for THIS checkout: the changed symbols
+    and the tests the walk reaches, each with its evidence chain and a
+    'why' — plus what was omitted. Receipts, not vibes."""
+    from pathlib import Path
+    from friction.live import gate_repo
+    g = gate_repo(Path.cwd(), changed)
+    items = []
+    for t in g.selected_tests[:20]:
+        chain = g.evidence.get(t, ())
+        items.append({
+            "kind": "test", "symbol": t,
+            "why": (" → ".join(chain)) if chain else "selected by the walk",
+            "estimated_tokens": max(24, len(t) // 3),
+        })
+    return json.dumps({
+        "snapshot": {"graph_sha": g.graph_sha, "repo_head": g.repo_head},
+        "verdict": g.verdict.decision,
+        "items": items,
+        "omitted": max(0, len(g.selected_tests) - 20),
+        "note": "at measured recall the full suite is the safety net — the "
+                "pack is a review head start, never a skip licence",
+    }, indent=2)
+
+
 mcp.tool()(gate_check)
 mcp.tool()(gate_explain)
+mcp.tool()(route)
+mcp.tool()(context_pack)
 
 
 def run() -> None:

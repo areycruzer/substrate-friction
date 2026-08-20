@@ -37,7 +37,11 @@ allocator when a class can *pass* — the roadmap, in order:
    type; permit selection only where a subgroup's Wilson lower bound
    clears the bar.
 3. **Third oracles** — runtime coverage and mutation-based affected-test
-   labels beside SWE-bench, with agreement/disagreement reported.
+   labels beside SWE-bench, with agreement/disagreement reported. The
+   coverage oracle concretely: a small pytest plugin that records, per test
+   executed, the set of source files/lines it touched (coverage contexts),
+   and writes those as dynamic `COVERS` edges — the runtime evidence the
+   static walk lacks, collected as a side effect of every normal suite run.
 4. **Executor integration** — run the selected subset for real (the fail-closed
    executor pattern fellow entries already ship), so saved wall-clock time becomes the headline metric:
    "X% fewer tests, zero known fault-revealing tests missed, one-sided

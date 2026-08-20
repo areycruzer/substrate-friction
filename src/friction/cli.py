@@ -780,6 +780,42 @@ def cmd_triage(args) -> int:
     return 0 if report.tier in ("ai-autonomy", "out-of-scope") else 1
 
 
+def cmd_run(args) -> int:
+    """Build (and optionally execute) the test command a verdict implies.
+
+    Without --exec: prints the selected-few pytest command AND the full-suite
+    fallback — at measured recall the fallback is the safety net, so they
+    always ship together. With --exec: runs the selected few and reports
+    pytest's own exit code (0 pass / 1 fail) — the executor reports, it does
+    not editorialize.
+    """
+    from friction.executor import build_plan, execute
+    from friction.live import gate_repo
+
+    gate = gate_repo(args.repo, list(args.changed))
+    plan = build_plan(gate.selected_tests)
+    v = gate.verdict
+    print(f"verdict: {v.decision} (recall {v.measured_recall:.3f} vs bar "
+          f"{v.threshold:.2f}) — selected {len(plan.selected_ids):,} of "
+          f"{gate.total_tests:,} tests")
+    print(f"  selected : {' '.join(plan.selected_command)}")
+    print(f"  fallback : {' '.join(plan.full_command)}   (the safety net)")
+    if not plan.selected_ids:
+        print("  nothing mappable to a pytest node id — run the fallback")
+        return 1
+    if args.json:
+        print(json.dumps({"decision": v.decision,
+                          "selected": list(plan.selected_ids),
+                          "selected_command": plan.selected_command,
+                          "full_command": plan.full_command}, indent=2))
+    if args.exec:
+        out = execute(args.repo, plan.selected_command)
+        print(f"  executed : exit {out['exit_code']} in {out['seconds']}s")
+        print("  " + out["tail"].replace("\n", "\n  "))
+        return out["exit_code"]
+    return 0 if v.decision == "SKIP_SAFE" else 1
+
+
 def _print_doc(path: Path, missing_hint: str) -> int:
     if not Path(path).exists():
         print(missing_hint)
@@ -1123,6 +1159,31 @@ def cmd_verify(args) -> int:
     print(tui.flash("VERIFY OK:") + " shipped graphs re-audited (24/44, 15/30); "
           "corpus summary re-derived from per-instance rows; docs/README/site "
           "quote the artifact exactly.")
+    cert = getattr(args, "certificate", None)
+    if cert:
+        import hashlib
+        import subprocess as _sp
+        from datetime import datetime, timezone
+        try:
+            head = _sp.run(["git", "rev-parse", "HEAD"], capture_output=True,
+                           text=True, timeout=5).stdout.strip()
+        except Exception:
+            head = "unknown"
+        blob = Path("data/shipped/gate-results.json").read_bytes()
+        payload = {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "repo_head": head,
+            "gate_results_sha256": hashlib.sha256(blob).hexdigest(),
+            "figures": {"arm_b": "24/44", "arm_a": "15/30",
+                        "pooled_b_recall": "0.419",
+                        "pooled_a_recall": "0.314"},
+            "claim": "every quoted figure re-derived from the committed "
+                     "artifact at the recorded head; re-run friction verify "
+                     "to reproduce this certificate",
+        }
+        Path(cert).write_text(json.dumps(payload, indent=2) + "\n",
+                              encoding="utf-8")
+        print(f"certificate written: {cert}")
     return 0
 
 
@@ -1355,6 +1416,17 @@ def main(argv: list[str] | None = None) -> int:
     gate_cmd.add_argument("--sarif", action="store_true",
                           help="emit the verdict as a SARIF run (code-scanning)")
 
+    run_cmd = sub.add_parser(
+        "run", help="the executor: the pytest command a verdict implies — "
+                    "selected few + full-suite fallback, always together")
+    run_cmd.add_argument("--repo", type=Path, default=Path("."))
+    run_cmd.add_argument("--changed", nargs="*", default=[],
+                         help="changed file paths, relative to --repo")
+    run_cmd.add_argument("--exec", action="store_true",
+                         help="actually run the selected few (exit code is "
+                              "pytest's own)")
+    run_cmd.add_argument("--json", action="store_true")
+
     tri_cmd = sub.add_parser(
         "triage", help="a GitHub PR/issue link in, a tier out: "
                        "human verification or AI autonomy")
@@ -1375,6 +1447,9 @@ def main(argv: list[str] | None = None) -> int:
         "verify",
         help="re-derive every shipped gate number from committed artifacts; "
              "nonzero exit on any mismatch")
+    ver_cmd.add_argument("--certificate", default=None, metavar="PATH",
+                         help="also write a JSON build certificate: figures, "
+                              "artifact digest, repo head, timestamp")
 
     diff_cmd = sub.add_parser(
         "diff",
@@ -1478,6 +1553,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "triage":
         return cmd_triage(args)
+
+    if args.command == "run":
+        return cmd_run(args)
 
     if args.command == "verify":
         return cmd_verify(args)

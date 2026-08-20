@@ -73,7 +73,9 @@ the GitHub Action (any repo: 10 lines of YAML) labeled and commented its own PR:
 
 - Repo: https://github.com/areycruzer/substrate-friction
 - Site: https://areycruzer.github.io/substrate-friction
-- Video: **[PLACEHOLDER — add the final URL before submitting]**
+- Video: **https://youtu.be/5RH1bvMIUKo** (2:55 — problem → solution →
+  live terminal proof → the bot's labels on real PRs → in-engine parity →
+  receipts, narrated over the recorded product)
 - Upstream: hydra-db/hydradb#81 · #82 (PR) · #101 · #102
 - Evidence entry points: `docs/gate.md` · `docs/longitudinal.md` ·
   `docs/engine-diff.md` · `docs/studies.md` · `docs/ORIGIN.md`

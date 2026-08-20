@@ -13,8 +13,10 @@ from friction.executor import build_plan, to_pytest_id
 def test_pytest_id_mapping():
     assert to_pytest_id("tests.test_gate::test_x") == \
         "tests/test_gate.py::test_x"
+    # class methods take pytest's '::' separator — the dotted form
+    # `path::Cls.method` collects NOTHING (verified: "no tests ran")
     assert to_pytest_id("pkg.mod::Cls.method") == \
-        "pkg/mod.py::Cls.method"
+        "pkg/mod.py::Cls::method"
     assert to_pytest_id("test_core::test_helper") == "test_core.py::test_helper"
     assert to_pytest_id("no_separator") is None
     assert to_pytest_id("..traversal::x") is None       # never guess paths
@@ -139,3 +141,22 @@ def test_mcp_router():
     assert json.loads(route("is it safe to skip tests?"))["route"] == \
         "gate_check"
     assert json.loads(route("what is the weather"))["route"] == "abstain"
+
+
+def test_class_method_id_actually_collects(tmp_path):
+    """Audit regression: the dotted `path::Cls.method` form collected ZERO
+    tests (pytest: "no tests ran") while exiting nonzero — a selected-few
+    command that silently runs nothing. The '::' form is pinned here against
+    pytest itself, not against our own expectations."""
+    (tmp_path / "test_cls.py").write_text(
+        "class TestFoo:\n    def test_bar(self):\n        assert True\n",
+        encoding="utf-8")
+    import subprocess
+    import sys
+    nid = to_pytest_id("test_cls::TestFoo.test_bar")
+    assert nid == "test_cls.py::TestFoo::test_bar"
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", nid, "-q", "-p", "no:cacheprovider"],
+        cwd=tmp_path, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout
+    assert "1 passed" in proc.stdout

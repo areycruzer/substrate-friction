@@ -36,7 +36,9 @@ def to_pytest_id(qualname: str) -> str | None:
     if module.startswith(".") or ".." in module:
         return None
     path = module.replace(".", "/") + ".py"
-    return f"{path}::{symbol}"
+    # pytest node ids separate class from method with '::', never '.':
+    # `path::Cls.method` collects NOTHING (verified: "no tests ran").
+    return f"{path}::{symbol.replace('.', '::')}"
 
 
 def build_plan(selected_tests: tuple[str, ...]) -> RunPlan:

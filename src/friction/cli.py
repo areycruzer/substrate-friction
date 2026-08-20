@@ -791,6 +791,10 @@ def cmd_run(args) -> int:
     """
     from friction.executor import build_plan, execute
     from friction.live import gate_repo
+    from friction import tui
+
+    if tui.styling():
+        print(tui.banner())
 
     gate = gate_repo(args.repo, list(args.changed))
     plan = build_plan(gate.selected_tests)

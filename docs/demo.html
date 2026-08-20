@@ -3,52 +3,208 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Substrate Friction — django-11490</title>
+<title>demo — substrate—friction · same code, two call graphs</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#000000; --panel:#0a0a0a; --ink:#dadada; --muted:#747474;
-    --confirmed:#9ca3af; --unconfirmed:#ff571a; --fix:#ffffff; --test:#f9c425;
-    --armb:#ff571a; --line:#2e2e2e;
+    --paper:#d4d3cb; --paper-deep:#dcdbd3; --ink:#161413; --ink-soft:#4a4642;
+    --muted:#838077; --cream:#faf9f6;
+    --line:rgba(22,20,19,0.12); --line-strong:rgba(22,20,19,0.22);
+    --accent:#ff571a; --yellow:#c99a07;
+    --confirmed:#838077; --unconfirmed:#ff571a; --fix:#161413; --test:#c99a07;
   }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink);
-    font:15px/1.5 Inter,system-ui,sans-serif; }
-  header { padding:18px 22px 14px; border-bottom:1px solid var(--line);
-    background:#000000; }
-  h1 { margin:0 0 4px; font-size:22px; letter-spacing:.5px;
-    font-family:'VT323',ui-monospace,monospace;font-weight:400; }
-  .sub { color:var(--muted); font-size:13.5px; margin-bottom:12px; }
-  .stats { display:flex; flex-wrap:wrap; gap:8px; }
-  .stat { background:var(--panel); border:1px solid var(--line); border-radius:0;
-    padding:6px 11px; font-size:13px; }
-  .stat b { color:#fff; font-size:15px; }
-  .caveat { margin-top:11px; padding:9px 12px; border-left:3px solid var(--armb);
-    background:#0a0a0a; border-left-width:3px; font-size:12.8px; color:#dadada; }
-  .bar { display:flex; flex-wrap:wrap; align-items:center; gap:10px;
-    padding:12px 22px; border-bottom:1px solid var(--line); background:var(--panel); }
-  button { font:600 13.5px inherit; color:#fff; background:var(--unconfirmed);color:#000;
-    border:0; border-radius:0; padding:9px 15px; cursor:pointer; }
-  button.ghost { background:#202020; }
-  button:disabled { opacity:.45; cursor:default; }
-  .counter { font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--muted); }
-  .counter b { color:#fff; font-size:16px; }
-  .legend { display:flex; gap:15px; margin-left:auto; flex-wrap:wrap;
-    font-size:12.5px; color:var(--muted); }
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    background:var(--paper); color:var(--ink);
+    font:15px/1.6 Geist,ui-sans-serif,system-ui,sans-serif;
+    overflow-x:hidden;
+  }
+
+  /* paper grain */
+  body::before {
+    content:''; position:fixed; inset:0; z-index:50; pointer-events:none; opacity:0.35;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* nav */
+  .nav-outer { position:sticky; top:0; z-index:100; padding:16px 28px 0; margin-bottom:-62px; }
+  .nav-shell { position:relative; height:46px; width:100%; }
+  .nav-cluster {
+    position:relative; display:flex; align-items:center; justify-content:center;
+    width:max-content; margin:0 auto; height:46px; border-radius:999px;
+    background:rgba(240,239,234,0.72);
+    backdrop-filter:blur(4px) saturate(180%) brightness(108%);
+    -webkit-backdrop-filter:blur(4px) saturate(180%) brightness(108%);
+    box-shadow:inset 0 0 10px rgba(0,0,0,0.05);
+    transition:background .45s cubic-bezier(.16,1,.3,1),box-shadow .45s cubic-bezier(.16,1,.3,1);
+  }
+  .nav-cluster::before {
+    content:''; position:absolute; inset:0; border-radius:999px; padding:1px;
+    background:linear-gradient(122deg,rgba(255,255,255,1) 0%,rgba(255,255,255,.45) 40%,rgba(255,255,255,.05) 78%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    mask-composite:exclude; pointer-events:none; opacity:1; transition:opacity .45s;
+  }
+  .nav-shell.split .nav-cluster { background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; }
+  .nav-shell.split .nav-cluster::before { opacity:0; }
+  .nav-group {
+    position:relative; display:flex; align-items:center; height:46px; border-radius:999px;
+    background:transparent; transform:translateX(0);
+    transition:transform .65s cubic-bezier(.22,1,.36,1),background .45s cubic-bezier(.16,1,.3,1),box-shadow .45s cubic-bezier(.16,1,.3,1);
+    will-change:transform;
+  }
+  .nav-group::before {
+    content:''; position:absolute; inset:0; border-radius:999px; padding:1px;
+    background:linear-gradient(122deg,rgba(255,255,255,1) 0%,rgba(255,255,255,.45) 40%,rgba(255,255,255,.05) 78%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    mask-composite:exclude; pointer-events:none; opacity:0; transition:opacity .45s;
+  }
+  .nav-shell.split .nav-group { background:rgba(240,239,234,0.72); backdrop-filter:blur(4px) saturate(180%) brightness(108%); -webkit-backdrop-filter:blur(4px) saturate(180%) brightness(108%); box-shadow:inset 0 0 10px rgba(0,0,0,0.05); }
+  .nav-shell.split .nav-group::before { opacity:1; }
+  .nav-shell.split .nav-group-left { transform:translateX(calc(-1 * var(--shift-l,0px))); }
+  .nav-shell.split .nav-group-right { transform:translateX(var(--shift-r,0px)); transition-duration:.55s,.45s,.45s; }
+  .nav-link { position:relative; font-size:14px; font-weight:500; color:var(--ink); padding:6px 12px; display:inline-flex; align-items:center; text-decoration:none; }
+  .nav-link::after { content:''; position:absolute; left:12px; right:100%; bottom:4px; height:1px; background:var(--ink); transition:right .25s cubic-bezier(.4,0,.2,1); }
+  .nav-link:hover::after { right:12px; }
+  .nav-link:hover { text-decoration:none; }
+  .pill-dark { background:var(--ink); color:var(--cream); border-radius:999px; padding:7px 20px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px; transition:all .3s cubic-bezier(.16,1,.3,1); text-decoration:none; margin:4px; }
+  .pill-dark:hover { background:#000; transform:scale(1.02); text-decoration:none; color:var(--cream); }
+  .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; flex-shrink:0; box-shadow:0 0 8px rgba(16,185,129,0.6); animation:blink-dot 2s ease-in-out infinite; }
+  @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.25} }
+  /* mobile nav */
+  .nav-mobile { display:none; flex-direction:column; }
+  .nav-mobile-bar { display:flex; align-items:center; justify-content:space-between; height:46px; padding:0 20px; background:rgba(240,239,234,0.8); backdrop-filter:blur(8px); border-radius:999px; }
+  .hamburger { background:none; border:none; cursor:pointer; color:var(--ink); font-size:18px; line-height:1; padding:4px 2px; }
+  .mobile-menu { display:none; flex-direction:column; gap:14px; margin-top:10px; padding:22px 26px; background:rgba(240,239,234,0.92); backdrop-filter:blur(12px); border-radius:24px; }
+  .mobile-menu.open { display:flex; }
+  .mobile-menu a { font-size:15px; font-weight:500; color:var(--ink); text-decoration:none; }
+  @media (max-width:900px) { .nav-shell { display:none; } .nav-mobile { display:flex; } }
+  @media (prefers-reduced-motion:reduce) { .nav-cluster,.nav-cluster::before,.nav-group,.nav-group::before { transition:none; } .status-dot { animation:none; } }
+
+  /* page chrome */
+  header {
+    padding:120px 28px 56px;
+    border-bottom:1px solid var(--line);
+    position:relative; z-index:1;
+  }
+  .header-label {
+    font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase;
+    letter-spacing:.12em; color:var(--muted);
+    display:flex; align-items:center; gap:8px; margin-bottom:16px;
+  }
+  .header-label::before { content:''; display:inline-block; width:22px; height:1px; background:var(--accent); }
+
+  h1 {
+    margin:0 0 10px;
+    font-family:'Instrument Serif',Georgia,serif;
+    font-size:clamp(26px,3.5vw,42px);
+    font-weight:400; letter-spacing:-0.02em; color:var(--ink); line-height:1.1;
+  }
+  .sub { color:var(--ink-soft); font-size:14px; margin-bottom:20px; max-width:72ch; }
+  .stats { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .stat {
+    background:var(--cream); border:1px solid var(--line-strong);
+    padding:7px 14px; font-size:13px; color:var(--ink-soft);
+    font-family:'Geist Mono',monospace;
+  }
+  .stat b { color:var(--accent); font-size:15px; font-weight:600; }
+  .caveat {
+    margin-top:14px; padding:12px 16px;
+    border-left:3px solid var(--accent);
+    background:rgba(255,87,26,0.05);
+    font-size:13px; color:var(--ink-soft);
+    max-width:80ch;
+  }
+  .caveat code { font-family:'Geist Mono',monospace; background:rgba(22,20,19,0.07); padding:1px 4px; font-size:.9em; }
+
+  /* toolbar */
+  .bar {
+    display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+    padding:12px 28px; border-bottom:1px solid var(--line);
+    background:rgba(22,20,19,0.03);
+    position:relative; z-index:1;
+  }
+  button {
+    font:600 13px Geist,inherit; color:var(--cream);
+    background:var(--ink); border:none;
+    padding:8px 18px; cursor:pointer; border-radius:2px;
+    transition:background .15s;
+  }
+  button:hover { background:#000; }
+  button.ghost { background:transparent; color:var(--ink); border:1px solid var(--line-strong); }
+  button.ghost:hover { background:rgba(22,20,19,0.05); border-color:var(--ink); }
+  button:disabled { opacity:.4; cursor:default; }
+  .counter { font-variant-numeric:tabular-nums; font-size:13px; color:var(--muted); font-family:'Geist Mono',monospace; }
+  .counter b { color:var(--ink); font-size:15px; }
+  .legend { display:flex; gap:14px; margin-left:auto; flex-wrap:wrap; font-size:12px; color:var(--muted); font-family:'Geist Mono',monospace; }
   .legend span { display:inline-flex; align-items:center; gap:6px; }
-  .swatch { width:14px; height:3px; border-radius:0; display:inline-block; }
-  .dot { width:11px; height:11px; border-radius:0; display:inline-block; }
-  #cy { width:100%; height:62vh; min-height:420px; background:#000; }
-  footer { padding:10px 22px; color:var(--muted); font-size:12px;
-    border-top:1px solid var(--line); }
-  .view { color:var(--muted); font-size:13px; }
+  .swatch { width:14px; height:3px; display:inline-block; }
+  .dot { width:10px; height:10px; display:inline-block; }
+  .view { color:var(--muted); font-size:13px; font-family:'Geist Mono',monospace; }
+
+  /* graph canvas */
+  #cy { width:100%; height:62vh; min-height:420px; background:var(--cream); border-bottom:1px solid var(--line); position:relative; z-index:1; }
+
+  /* footer */
+  footer {
+    padding:32px 28px;
+    color:var(--muted); font-size:12px;
+    font-family:'Geist Mono',monospace;
+    line-height:1.8;
+    position:relative; z-index:1;
+  }
+  footer code { background:rgba(22,20,19,0.06); padding:1px 4px; font-size:.92em; }
+  footer a { color:var(--muted); text-decoration:underline; }
+  footer a:hover { color:var(--ink); }
 </style>
 </head>
 <body>
+
+<!-- ── nav ── -->
+<nav class="nav-outer" role="navigation" aria-label="Main">
+  <div id="nav-shell" class="nav-shell">
+    <div class="nav-cluster">
+      <div class="nav-group nav-group-left" style="gap:2px;padding:0 8px">
+        <div style="display:flex;align-items:center;gap:6px;margin-right:8px;padding-right:10px;border-right:1px solid rgba(22,20,19,0.14);flex-shrink:0">
+          <span class="status-dot"></span>
+          <span style="font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:.1em;color:#059669;font-weight:600;text-transform:uppercase">GATE ACTIVE</span>
+        </div>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="walkthrough.html" class="nav-link">Walkthrough</a>
+        <a href="https://github.com/areycruzer/substrate-friction/blob/main/docs/gate.md" class="nav-link">Docs</a>
+      </div>
+      <a href="index.html" class="nav-group" style="padding:0 24px;text-decoration:none">
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:19px;letter-spacing:-0.02em;color:var(--ink)">substrate<span style="color:var(--accent)">—</span>friction</span>
+      </a>
+      <div class="nav-group nav-group-right" style="gap:2px;padding:0 6px">
+        <a href="https://github.com/areycruzer/substrate-friction" class="nav-link">GitHub</a>
+        <a href="https://github.com/areycruzer/substrate-friction#quickstart" class="pill-dark">Run the gate</a>
+      </div>
+    </div>
+  </div>
+  <div class="nav-mobile">
+    <div class="nav-mobile-bar">
+      <a href="index.html" style="font-family:'Instrument Serif',Georgia,serif;font-size:17px;letter-spacing:-0.02em;color:var(--ink);text-decoration:none">substrate<span style="color:var(--accent)">—</span>friction</a>
+      <button class="hamburger" id="mob-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    </div>
+    <div class="mobile-menu" id="mob-menu">
+      <a href="index.html">Home</a>
+      <a href="walkthrough.html">Walkthrough</a>
+      <a href="https://github.com/areycruzer/substrate-friction/blob/main/docs/gate.md">Docs</a>
+      <a href="https://github.com/areycruzer/substrate-friction">GitHub</a>
+      <a href="https://github.com/areycruzer/substrate-friction#quickstart" class="pill-dark" style="justify-content:center;margin:4px 0 0">Run the gate</a>
+    </div>
+  </div>
+</nav>
+
 <header>
-  <h1>Same code, two call graphs — the wrong edges, and what pruning them costs</h1>
+  <div class="header-label">Graph Demo / Django-11490</div>
+  <h1>Same code, two call graphs —<br>the wrong edges, and what pruning them costs</h1>
   <div class="sub">django__django-11490 — fix-site neighbourhood of get_combinator_sql(). Name-matched
     (arm&nbsp;A) vs type-resolved via scip-python (arm&nbsp;B).</div>
   <div class="stats">
@@ -89,9 +245,46 @@
   <code>[:CALLS*1..k]</code> always returns; on one 34k-node django-density graph
   it answers in 6–10&nbsp;ms (typical source) to 6.5&nbsp;s (busiest hub) while
   path enumeration on that same graph runs to tens of seconds — up to the
-  30,000&nbsp;ms ceiling (see docs/latency.md). Graph data embedded inline;
-  Cytoscape.js vendored
-  locally — this page needs no network.</footer>
+  30,000&nbsp;ms ceiling (see <a href="https://github.com/areycruzer/substrate-friction/blob/main/docs/latency.md">docs/latency.md</a>). Graph data embedded inline;
+  Cytoscape.js vendored locally — this page needs no network.</footer>
+
+<script>
+/* ── nav fly-apart ── */
+(function(){
+  var shell = document.getElementById('nav-shell');
+  if (!shell) return;
+  function measure() {
+    var cluster = shell.querySelector('.nav-cluster');
+    var lg = shell.querySelector('.nav-group-left');
+    var rg = shell.querySelector('.nav-group-right');
+    if (!cluster || !lg || !rg) return;
+    var shiftL = cluster.offsetLeft + lg.offsetLeft;
+    var shiftR = shell.clientWidth - (cluster.offsetLeft + rg.offsetLeft + rg.offsetWidth);
+    shell.style.setProperty('--shift-l', Math.max(0, shiftL) + 'px');
+    shell.style.setProperty('--shift-r', Math.max(0, shiftR) + 'px');
+  }
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(function(){ shell.classList.toggle('split', window.scrollY > 48); ticking = false; });
+  }
+  measure(); onScroll();
+  window.addEventListener('scroll', onScroll, { passive:true });
+  window.addEventListener('resize', measure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+})();
+/* ── mobile menu ── */
+(function(){
+  var btn = document.getElementById('mob-toggle');
+  var menu = document.getElementById('mob-menu');
+  if (!btn || !menu) return;
+  btn.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? '✕' : '☰';
+  });
+})();
+</script>
 
 <!-- vendored: docs/vendor/cytoscape.min.js — Cytoscape.js 3.30.2 (MIT), inlined for offline use -->
 <script>/**

@@ -798,8 +798,17 @@ def cmd_run(args) -> int:
     print(f"verdict: {v.decision} (recall {v.measured_recall:.3f} vs bar "
           f"{v.threshold:.2f}) — selected {len(plan.selected_ids):,} of "
           f"{gate.total_tests:,} tests")
-    print(f"  selected : {' '.join(plan.selected_command)}")
-    print(f"  fallback : {' '.join(plan.full_command)}   (the safety net)")
+    # display form: `python -m pytest` with one id per continuation line —
+    # runnable verbatim; --exec still uses sys.executable for exactness
+    if len(plan.selected_ids) == 1:
+        print(f"  selected : python -m pytest {plan.selected_ids[0]}")
+    elif plan.selected_ids:
+        print("  selected : python -m pytest \\")
+        for i, nid in enumerate(plan.selected_ids):
+            cont = " \\" if i < len(plan.selected_ids) - 1 else ""
+            print(f"      {nid}{cont}")
+    print("  fallback : python -m pytest   (the safety net — always beside "
+          "the few)")
     if not plan.selected_ids:
         print("  nothing mappable to a pytest node id — run the fallback")
         return 1

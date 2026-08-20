@@ -86,10 +86,16 @@ runs:
         new_label=$(jq -r .label triage.json)
         n="${pr##*/}"
         # remove any triage/* label that is not the new one
+        # fork PRs run with a READ-ONLY token: labeling is best-effort,
+        # never a workflow failure — the verdict comment carries the decision
         for l in $(gh pr view "$n" --json labels --jq '.labels[].name' | grep '^triage/' || true); do
-          if [ "$l" != "$new_label" ]; then gh pr edit "$n" --remove-label "$l"; fi
+          if [ "$l" != "$new_label" ]; then
+            gh pr edit "$n" --remove-label "$l" 2>/dev/null \
+              || echo "::warning::could not remove label (read-only token?)" >&2
+          fi
         done
-        gh pr edit "$n" --add-label "$new_label"
+        gh pr edit "$n" --add-label "$new_label" 2>/dev/null \
+          || echo "::warning::could not apply label (read-only token?) — verdict is in the comment" >&2
 
     - name: Post or update the verdict comment
       shell: bash
@@ -110,4 +116,4 @@ runs:
             -f body="$(cat comment.md)" >/dev/null
         else
           gh pr comment "$n" --body-file comment.md >/dev/null
-        fi
+        fi || echo "::warning::could not post the verdict comment (read-only token?)" >&2

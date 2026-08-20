@@ -18,7 +18,7 @@ export default function Hero() {
       </div>
 
       <div className="relative max-w-6xl mx-auto px-6 z-10">
-        <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
+        <div className="grid md:grid-cols-[0.95fr_1.05fr] gap-10 lg:gap-12 items-center">
           <div>
             <div className="reveal flex items-center gap-2 mb-7">
               <span className="status-dot w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
@@ -51,7 +51,7 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="reveal reveal-delay-200 hidden md:block">
+          <div className="reveal reveal-delay-200 min-w-0">
             <TerminalMockup />
           </div>
         </div>

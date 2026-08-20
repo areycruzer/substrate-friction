@@ -1,225 +1,216 @@
 import { useState, useEffect, useRef } from 'react'
-import { Terminal as TerminalIcon, Play, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react'
+import ConsoleWindow, { ConsolePill } from './ConsoleWindow'
 
+// Both playbacks mirror committed captures (docs/captures/) — the gate
+// refuses (that IS the product), and verify passes because the shipped
+// artifacts are consistent. Nothing invented.
+const BANNER_TOP = `███████╗██╗   ██╗██████╗ ███████╗████████╗██████╗  █████╗ ████████╗███████╗
+██╔════╝██║   ██║██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝██╔════╝
+███████╗██║   ██║██████╔╝███████╗   ██║   ██████╔╝███████║   ██║   █████╗
+╚════██║██║   ██║██╔══██╗╚════██║   ██║   ██╔══██╗██╔══██║   ██║   ██╔══╝
+███████║╚██████╔╝██████╔╝███████║   ██║   ██║  ██║██║  ██║   ██║   ███████║
+╚══════╝ ╚═════╝ ╚═════╝ ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝`
+
+const BANNER_BOTTOM = `   ███████╗██████╗ ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗
+   ██╔════╝██╔══██╗██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║
+───█████╗  ██████╔╝██║██║        ██║   ██║██║   ██║██╔██╗ ██║
+───██╔══╝  ██╔══██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║
+   ██║     ██║  ██║██║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║
+   ╚═╝     ╚═╝  ╚═╝╚═╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝`
+
+const SEP = '────────────────────────────────────────────────────'
+
+// Mirrors docs/captures/10-hero-session.txt — the README hero terminal.
 const GATE_RUN = [
-  { type: 'type', text: 'friction gate --arm arm_b --threshold 0.95' },
-  { type: 'line', text: '[info] loading consensus database (consensus.json)...', delay: 500, color: 'text-muted' },
-  { type: 'line', text: '[info] loaded 172 historical bug-fixes, 7 repositories', delay: 300, color: 'text-muted' },
-  { type: 'line', text: '[triage] calculating blast radius for diff: HEAD~1..HEAD', delay: 700, color: 'text-cream/90' },
-  { type: 'line', text: '[triage] mapping AST code symbols to guarding tests...', delay: 500, color: 'text-cream/90' },
-  { type: 'line', text: '[engine] comparing arms: arm_a (name-match) vs arm_b (type-resolve)', delay: 600, color: 'text-cream/90' },
-  { type: 'line', text: '[engine] diffing AST edges... 5,811 semantic relationships parsed', delay: 600, color: 'text-cream/90' },
-  { type: 'line', text: '[engine] WARNING: 104 dynamic call sites missing in arm_a', delay: 400, color: 'text-accent' },
-  { type: 'line', text: '[evaluate] evaluating test->fix recall constraint...', delay: 700, color: 'text-cream/90' },
-  { type: 'line', text: '[evaluate] recall score: 0.419 (72/172 fixes reachable in graph)', delay: 500, color: 'text-accent font-semibold' },
-  { type: 'line', text: '[evaluate] skip threshold: 0.95 (FAIL)', delay: 400, color: 'text-accent' },
-  { type: 'line', text: '', delay: 100 },
-  { type: 'verdict', text: 'VERDICT: FAIL_CLOSED (RUN_FULL)', delay: 700, badge: 'FAIL', color: 'text-accent font-bold' },
-  { type: 'line', text: '[status] exit code 1 (gate refused skip command)', delay: 400, color: 'text-accent' },
+  { type: 'type', text: 'friction gate --arm arm_b' },
+  { type: 'banner', delay: 250 },
+  { type: 'line', text: 'measure the map before you trust it', delay: 350, color: 'dim' },
+  { type: 'line', text: SEP, delay: 300, color: 'dim' },
+  { type: 'fail', text: '[FAIL]  RUN_FULL      arm=arm_b  k=6', delay: 500 },
+  { type: 'line', text: SEP, delay: 250, color: 'dim' },
+  { type: 'line', text: '  measured test->fix recall : 0.545  (24/44 labelled instances)', delay: 500, color: 'plain' },
+  { type: 'line', text: '  bar for skipping          : 0.95', delay: 400, color: 'plain' },
+  { type: 'line', text: '', delay: 150 },
+  { type: 'line', text: '  45% of tests known to guard their fix are not reachable', delay: 450, color: 'warn' },
+  { type: 'line', text: '  in this graph — a skip would silently drop them', delay: 250, color: 'warn' },
+  { type: 'line', text: '', delay: 150 },
+  { type: 'line', text: '  per repo:', delay: 300, color: 'plain' },
+  { type: 'bar', text: '    django          24/44   0.55  ', delay: 400 },
+  { type: 'line', text: SEP, delay: 300, color: 'dim' },
+  { type: 'line', text: '', delay: 200 },
+  { type: 'type', text: 'friction gate --instance django__django-11551 --live' },
+  { type: 'fail', text: '  django__django-11551   LIVE — executed in the engine', delay: 450 },
+  { type: 'line', text: '  loaded : 28,353 nodes, 61,536 edges in 10421 ms', delay: 500, color: 'plain' },
+  { type: 'line', text: '  query  : MATCH (s {id:…})-[:CALLED_BY*1..6]->(n)', delay: 450, color: 'dim' },
+  { type: 'line', text: '           engine 3.2 ms, 2 nodes reached', delay: 350, color: 'plain' },
+  { type: 'line', text: '  engine selected 0 of 1 guarding tests; parity=True', delay: 500, color: 'plain' },
+  { type: 'fail', text: '  DROPPED: 1 guarding test — the engine itself proves the miss.', delay: 500 },
+  { type: 'line', text: '', delay: 150 },
+  { type: 'verdict', text: 'RUN_FULL — route to human verification · exit 1', badge: 'FAIL', delay: 600 },
 ]
 
-const VALIDATE_RUN = [
-  { type: 'type', text: 'friction validate --commits HEAD~20..HEAD' },
-  { type: 'line', text: '[verify] scanning 20 commits for AST changes...', delay: 500, color: 'text-muted' },
-  { type: 'line', text: '[verify] parsing python AST structure at each commit...', delay: 400, color: 'text-muted' },
-  { type: 'line', text: '[verify] testing S5 (django longitudinal suite)...', delay: 600, color: 'text-cream/90' },
-  { type: 'line', text: '[verify] resolved 12,482 function calls and import paths', delay: 500, color: 'text-cream/90' },
-  { type: 'line', text: '[verify] Name-Matched recall: 0.419 (unsafe)', delay: 500, color: 'text-accent' },
-  { type: 'line', text: '[verify] Type-Resolved recall: 1.000 (172/172 fixes reachable)', delay: 600, color: 'text-emerald-500 font-semibold' },
-  { type: 'line', text: '[verify] consensus engine validation hash: sha256:d8b78a0a', delay: 400, color: 'text-muted' },
-  { type: 'line', text: '', delay: 100 },
-  { type: 'verdict', text: 'VERDICT: PASS_SKIP (GATE_PASS)', delay: 700, badge: 'PASS', color: 'text-emerald-500 font-bold' },
-  { type: 'line', text: '[status] exit code 0 (skip request certified)', delay: 400, color: 'text-emerald-500' },
+const VERIFY_RUN = [
+  { type: 'type', text: 'friction verify' },
+  { type: 'line', text: '[verify] re-auditing shipped graphs… (24/44, 15/30)', delay: 600, color: 'dim' },
+  { type: 'line', text: '[verify] re-deriving corpus summary from per-instance rows', delay: 500, color: 'plain' },
+  { type: 'line', text: '[verify] asserting README + site quote the artifact exactly', delay: 500, color: 'plain' },
+  { type: 'line', text: '[verify] engine digest-pinned: hydradb@sha256:db78309a…', delay: 400, color: 'dim' },
+  { type: 'line', text: '', delay: 150 },
+  { type: 'verdict', text: 'VERIFY OK — every shipped figure re-derived', badge: 'PASS', delay: 700 },
+  { type: 'line', text: '[status] exit code 0 · nonzero on any drift', delay: 400, color: 'ok' },
 ]
+
+const COLORS = {
+  dim: 'rgba(250,249,246,0.4)',
+  plain: 'rgba(250,249,246,0.78)',
+  warn: '#ff8a55',
+  ok: '#7dc383',
+}
 
 export default function TerminalMockup() {
-  const [activeTab, setActiveTab] = useState('gate') // 'gate' or 'validate'
+  const [activeTab, setActiveTab] = useState('gate')
   const [lines, setLines] = useState([])
-  const [currentTypeText, setCurrentTypeText] = useState('')
-  const [typingIndex, setTypingIndex] = useState(0)
-  const [timelineIndex, setTimelineIndex] = useState(0)
-  const [isTyping, setIsTyping] = useState(false)
+  const [typing, setTyping] = useState(null) // string while typing
+  const [done, setDone] = useState(false)
   const timerRef = useRef(null)
+  const scrollRef = useRef(null)
 
-  const timeline = activeTab === 'gate' ? GATE_RUN : VALIDATE_RUN
+  const timeline = activeTab === 'gate' ? GATE_RUN : VERIFY_RUN
 
-  useEffect(() => {
-    // Reset terminal when tab changes
-    setLines([])
-    setCurrentTypeText('')
-    setTypingIndex(0)
-    setTimelineIndex(0)
-    setIsTyping(false)
-    if (timerRef.current) clearTimeout(timerRef.current)
+  const clear = () => { if (timerRef.current) clearTimeout(timerRef.current) }
 
-    // Trigger start of typing
-    startTimelineStep(0)
-
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
-  }, [activeTab])
-
-  const startTimelineStep = (index) => {
+  const runStep = (index) => {
     if (index >= timeline.length) {
-      // Loop after delay
+      setDone(true)
       timerRef.current = setTimeout(() => {
-        setLines([])
-        setCurrentTypeText('')
-        setTypingIndex(0)
-        setTimelineIndex(0)
-        startTimelineStep(0)
-      }, 5000)
+        setLines([]); setDone(false); runStep(0)
+      }, 6000)
       return
     }
-
-    setTimelineIndex(index)
     const step = timeline[index]
-
     if (step.type === 'type') {
-      setIsTyping(true)
-      setCurrentTypeText('')
-      typeChar(step.text, 0, index)
+      const typeChar = (n) => {
+        if (n <= step.text.length) {
+          setTyping(step.text.slice(0, n))
+          timerRef.current = setTimeout(() => typeChar(n + 1), 28 + Math.random() * 30)
+        } else {
+          timerRef.current = setTimeout(() => {
+            setTyping(null)
+            setLines(prev => [...prev, { type: 'command', text: step.text }])
+            runStep(index + 1)
+          }, 400)
+        }
+      }
+      typeChar(0)
     } else {
-      setIsTyping(false)
       timerRef.current = setTimeout(() => {
         setLines(prev => [...prev, step])
-        startTimelineStep(index + 1)
+        runStep(index + 1)
       }, step.delay || 400)
     }
   }
 
-  const typeChar = (text, charIdx, stepIdx) => {
-    if (charIdx <= text.length) {
-      setCurrentTypeText(text.slice(0, charIdx))
-      timerRef.current = setTimeout(() => {
-        typeChar(text, charIdx + 1, stepIdx)
-      }, 35 + Math.random() * 40) // Random typing speed
-    } else {
-      setIsTyping(false)
-      timerRef.current = setTimeout(() => {
-        setLines(prev => [...prev, { type: 'command', text }])
-        setCurrentTypeText('')
-        startTimelineStep(stepIdx + 1)
-      }, 500)
-    }
-  }
+  useEffect(() => {
+    clear(); setLines([]); setTyping(null); setDone(false)
+    runStep(0)
+    return clear
+  }, [activeTab])
 
-  const restartSimulation = () => {
-    setLines([])
-    setCurrentTypeText('')
-    setTypingIndex(0)
-    setTimelineIndex(0)
-    setIsTyping(false)
-    if (timerRef.current) clearTimeout(timerRef.current)
-    startTimelineStep(0)
-  }
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+    }
+  }, [lines, typing])
+
+  const restart = () => { clear(); setLines([]); setTyping(null); setDone(false); runStep(0) }
 
   return (
-    <div className="relative group/term h-full min-h-[440px] rounded-xl overflow-hidden flex flex-col justify-between" style={{ background: '#161413', border: '1px solid rgba(22, 20, 19, 0.15)' }}>
-      {/* Corner Brackets */}
-      <span className="absolute top-[-3px] left-[-3px] w-3.5 h-3.5 border-t border-l border-cream/20 group-hover/term:border-accent transition-all duration-300 z-20" />
-      <span className="absolute top-[-3px] right-[-3px] w-3.5 h-3.5 border-t border-r border-cream/20 group-hover/term:border-accent transition-all duration-300 z-20" />
-      <span className="absolute bottom-[-3px] left-[-3px] w-3.5 h-3.5 border-b border-l border-cream/20 group-hover/term:border-accent transition-all duration-300 z-20" />
-      <span className="absolute bottom-[-3px] right-[-3px] w-3.5 h-3.5 border-b border-r border-cream/20 group-hover/term:border-accent transition-all duration-300 z-20" />
-
-      {/* Terminal Title Bar */}
-      <div className="px-5 py-3 border-b border-cream/10 flex items-center justify-between select-none bg-black/30 z-10">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-          <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-          <span className="text-[10px] text-cream/40 font-mono ml-2 flex items-center gap-1">
-            <TerminalIcon size={12} /> session · {activeTab === 'gate' ? 'gate.sh' : 'validate.sh'}
-          </span>
+    <ConsoleWindow
+      title={`substrate—friction · recorded session · ${activeTab === 'gate' ? 'gate' : 'verify'}`}
+      className="h-[440px]"
+      right={
+        <div className="flex items-center gap-2">
+          <ConsolePill active={activeTab === 'gate'} onClick={() => setActiveTab('gate')}>gate</ConsolePill>
+          <ConsolePill active={activeTab === 'verify'} onClick={() => setActiveTab('verify')}>verify</ConsolePill>
         </div>
-
-        {/* Tab Selector Buttons */}
-        <div className="flex items-center gap-1 bg-cream/5 p-0.5 rounded-lg border border-cream/10">
-          <button
-            onClick={() => setActiveTab('gate')}
-            className={`px-2.5 py-0.5 text-[9px] font-mono rounded transition-all ${
-              activeTab === 'gate' 
-                ? 'bg-cream text-ink font-semibold' 
-                : 'text-cream/50 hover:text-cream hover:bg-cream/5'
-            }`}
-          >
-            gate check
-          </button>
-          <button
-            onClick={() => setActiveTab('validate')}
-            className={`px-2.5 py-0.5 text-[9px] font-mono rounded transition-all ${
-              activeTab === 'validate' 
-                ? 'bg-cream text-ink font-semibold' 
-                : 'text-cream/50 hover:text-cream hover:bg-cream/5'
-            }`}
-          >
-            validate suite
-          </button>
-        </div>
-      </div>
-
-      {/* Terminal Terminal Screen */}
-      <div className="flex-1 p-6 font-mono text-[12.5px] leading-relaxed overflow-y-auto overflow-x-hidden text-cream/80 select-all no-scrollbar max-h-[340px]">
+      }
+      footer={
+        <>
+          <span>replayed from docs/captures/ · loops every 6 s</span>
+          <ConsolePill onClick={restart}><RefreshCw size={10} /> replay</ConsolePill>
+        </>
+      }
+    >
+      <div ref={scrollRef} className="flex-1 p-6 font-mono text-[12.5px] leading-[1.85] overflow-y-auto overflow-x-hidden no-scrollbar">
         {lines.map((line, idx) => {
           if (line.type === 'command') {
             return (
-              <div key={idx} className="mb-2">
-                <span className="text-emerald-500 mr-2">visitor@friction:~$</span>
-                <span className="text-cream font-medium">{line.text}</span>
+              <div key={idx} className="mb-1.5">
+                <span style={{ color: '#7dc383' }}>$ </span>
+                <span style={{ color: '#faf9f6', fontWeight: 500 }}>{line.text}</span>
               </div>
             )
           }
-
+          if (line.type === 'banner') {
+            return (
+              <div key={idx} className="my-3" style={{ fontSize: 'clamp(5px, 1.4vw, 8px)', lineHeight: 1.02, letterSpacing: 0, fontWeight: 700 }}>
+                <pre style={{ color: 'var(--accent)', fontFamily: 'inherit', textShadow: '0 0 6px rgba(255,87,26,0.35)' }}>{BANNER_TOP}</pre>
+                <pre style={{ color: '#faf9f6', fontFamily: 'inherit', marginTop: 2, textShadow: '0 0 5px rgba(250,249,246,0.25)' }}>{BANNER_BOTTOM}</pre>
+              </div>
+            )
+          }
+          if (line.type === 'fail') {
+            return (
+              <div key={idx} className="whitespace-pre font-semibold" style={{ color: 'var(--accent)' }}>
+                {line.text}
+              </div>
+            )
+          }
+          if (line.type === 'bar') {
+            return (
+              <div key={idx} className="whitespace-pre" style={{ color: 'rgba(250,249,246,0.78)' }}>
+                {line.text}
+                <span style={{ color: 'var(--accent)' }}>{'█'.repeat(10)}</span>
+                <span style={{ color: 'rgba(250,249,246,0.25)' }}>{'·'.repeat(8)}</span>
+              </div>
+            )
+          }
           if (line.type === 'verdict') {
             const isPass = line.badge === 'PASS'
             return (
-              <div key={idx} className="my-3 p-3 rounded-lg border inline-flex items-center gap-2" style={{
-                background: isPass ? 'rgba(16, 185, 129, 0.06)' : 'rgba(255, 87, 26, 0.06)',
-                borderColor: isPass ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 87, 26, 0.3)',
-              }}>
-                {isPass ? <CheckCircle2 size={16} className="text-emerald-500 animate-pulse" /> : <AlertTriangle size={16} className="text-accent animate-pulse" />}
-                <span className={line.color}>{line.text}</span>
+              <div key={idx} className="my-3 px-4 py-2.5 rounded-full inline-flex items-center gap-2.5 text-[12px] font-semibold"
+                style={{
+                  background: isPass ? 'rgba(125,195,131,0.1)' : 'rgba(255,87,26,0.1)',
+                  border: `1px solid ${isPass ? 'rgba(125,195,131,0.35)' : 'rgba(255,87,26,0.35)'}`,
+                  color: isPass ? '#7dc383' : '#ff8a55',
+                }}>
+                {isPass ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}
+                {line.text}
               </div>
             )
           }
-
           return (
-            <div key={idx} className={`mb-0.5 ${line.color || 'text-cream'}`}>
-              {line.text}
+            <div key={idx} className="whitespace-pre" style={{ color: COLORS[line.color] || COLORS.plain }}>
+              {line.text || ' '}
             </div>
           )
         })}
 
-        {/* Typing Line */}
-        {isTyping && (
+        {typing !== null && (
           <div>
-            <span className="text-emerald-500 mr-2">visitor@friction:~$</span>
-            <span className="text-cream font-medium">{currentTypeText}</span>
-            <span className="animate-ping font-bold ml-0.5" style={{ animationDuration: '0.8s' }}>_</span>
+            <span style={{ color: '#7dc383' }}>$ </span>
+            <span style={{ color: '#faf9f6', fontWeight: 500 }}>{typing}</span>
+            <span className="inline-block w-[7px] h-[13px] ml-px align-middle animate-pulse" style={{ background: 'var(--accent)' }} />
           </div>
         )}
-
-        {/* Blinking idle cursor */}
-        {!isTyping && timelineIndex >= timeline.length && (
+        {typing === null && done && (
           <div className="mt-1">
-            <span className="text-emerald-500 mr-2">visitor@friction:~$</span>
-            <span className="inline-block w-1.5 h-3 bg-cream animate-pulse" style={{ animationDuration: '1s' }} />
+            <span style={{ color: '#7dc383' }}>$ </span>
+            <span className="inline-block w-[7px] h-[13px] align-middle animate-pulse" style={{ background: 'rgba(250,249,246,0.7)' }} />
           </div>
         )}
       </div>
-
-      {/* Terminal Footer Panel */}
-      <div className="px-5 py-3 border-t border-cream/10 flex items-center justify-between select-none bg-black/15 z-10 text-[10px] text-cream/40 font-mono">
-        <span>Interval loop: 5s</span>
-        <button 
-          onClick={restartSimulation}
-          className="flex items-center gap-1 px-2.5 py-1 rounded border border-cream/10 hover:border-cream/30 hover:text-cream bg-cream/5 transition-all active:scale-95"
-        >
-          <RefreshCw size={10} />
-          Reset playback
-        </button>
-      </div>
-    </div>
+    </ConsoleWindow>
   )
 }

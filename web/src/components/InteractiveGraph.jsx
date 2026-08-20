@@ -276,14 +276,14 @@ export default function InteractiveGraph() {
             <div className="flex items-start gap-2 text-amber-700 bg-amber-500/5 p-2 rounded border border-amber-500/10">
               <XCircle size={14} className="shrink-0 mt-0.5" />
               <span>
-                <strong>Verdict: RUN_FULL (0.419 Recall)</strong>. Missing dynamic edges block skip requests, failing closed.
+                <strong>Verdict: RUN_FULL (0.314 recall)</strong>. The name-matched arm misses the dashed edges entirely — fail-closed.
               </span>
             </div>
           ) : (
-            <div className="flex items-start gap-2 text-emerald-700 bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
-              <CheckCircle2 size={14} className="shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 text-amber-700 bg-amber-500/5 p-2 rounded border border-amber-500/10">
+              <XCircle size={14} className="shrink-0 mt-0.5" />
               <span>
-                <strong>Verdict: GATE_PASS (1.000 Recall)</strong>. Type-resolved parser validates skip paths successfully.
+                <strong>Verdict: RUN_FULL (0.419 recall)</strong>. Type resolution recovers the dashed edges — closer, still below the 0.95 bar. No graph class has earned autonomy yet.
               </span>
             </div>
           )}

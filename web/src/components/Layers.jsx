@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ShieldCheck, GitFork, BarChart3, Terminal, Check, Copy } from 'lucide-react'
 import useReveal from '../useReveal'
+import ConsoleWindow from './ConsoleWindow'
 
 const blocks = [
   {
@@ -20,49 +21,49 @@ const blocks = [
   },
 ]
 
+// Real CLI commands only, with output taken from the committed captures
+// (docs/captures/) — nothing invented.
 const TABS = [
   {
-    name: 'Gate Mode',
+    name: 'The Gate',
     icon: ShieldCheck,
     tag: 'friction gate',
-    desc: 'Fail-closed CI gate blocking code merges when unmeasured/untrusted skips are detected. Asserts security for the test selection pipeline.',
-    cmd: `name: Run friction gate
-on: [push, pull_request]
-jobs:
-  triage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Verify skip map
-        run: |
-          uv run friction gate \\
-            --threshold 0.95 \\
-            --db data/consensus.json`,
-    lang: 'yaml',
+    desc: 'Measures guarding-test recall against 172 labelled bug fixes and turns it into an exit code. Below the 0.95 bar it refuses — RUN_FULL, exit 1, fail-closed in CI.',
+    cmd: `$ friction gate --arm arm_b
+[FAIL]  RUN_FULL      arm=arm_b  k=6
+  measured test->fix recall : 0.545  (24/44)
+  bar for skipping          : 0.95
+  45% of guarding tests are unreachable —
+  a skip would silently drop them
+[status] exit code 1 — the refusal is the product`,
+    lang: 'capture · 01-gate-verdict',
   },
   {
-    name: 'Map Gen',
+    name: 'The Diff',
     icon: GitFork,
-    tag: 'friction map',
-    desc: 'Compiles the AST-level codebase call graph, mapping test files directly to code symbols and functions using scip-python/pyright.',
-    cmd: `$ friction map --src src/ --output data/deps.json
-[info] parsing python files...
-[info] resolved 5,811 semantic node relationships
-[info] compiled dependency graph in 0.81 s
-[info] verification hash: sha256:d8b78a0a`,
-    lang: 'bash',
+    tag: 'friction diff --live',
+    desc: 'Diffs the name-matched arm against the type-resolved arm edge-for-edge, inside the engine — 5,873 queries at 2.0 ms each, parity with the offline join enforced by exception.',
+    cmd: `$ friction diff --live
+[engine] both arms resident, disjoint id bands
+[engine] anti-join: 5,873 edges @ 2.0 ms each
+[engine] confirmed by arm B     : 4,381
+[engine] unconfirmed (arm A only): 1,492
+[engine] offline join agrees exactly — parity
+         enforced by exception`,
+    lang: 'capture · engine-diff',
   },
   {
-    name: 'Recall Scorer',
+    name: 'The Audit',
     icon: BarChart3,
-    tag: 'friction validate',
-    desc: 'Evaluates your codebase map against historical commits and bug-fixes. Automatically generates a mathematical proof of test Selection Recall.',
-    cmd: `$ friction validate --commits HEAD~20..HEAD
-[verify] testing S5 (django django-44)
-[verify] recall: 0.419 (72 / 172 fixes reachable)
-[verdict] FAIL_CLOSED (lower bound 0.38 < threshold 0.95)
-[status] exit code 1`,
-    lang: 'bash',
+    tag: 'friction verify',
+    desc: 'Re-derives every shipped figure from committed artifacts and asserts the README and the website quote them exactly. Nonzero exit on any drift — it caught a real one on its first run.',
+    cmd: `$ friction verify
+[verify] shipped graphs re-audited (24/44, 15/30)
+[verify] corpus summary re-derived from
+         per-instance rows
+[verify] docs/README/site quote the artifact
+VERIFY OK — exit 0`,
+    lang: 'capture · 04-verify',
   },
 ]
 
@@ -179,43 +180,50 @@ export default function Layers() {
             </div>
 
             <div className="mt-12 pt-6 border-t border-line text-xs text-muted leading-relaxed">
-              * Verification uses SHA256 consensus hashing running on an embedded SQLite engine.
+              * Every output above is a committed capture, replayed. The engine is
+              digest-pinned (hydradb@sha256:db78309a…) and <code className="font-mono">friction verify</code> re-derives
+              every number on demand.
             </div>
           </div>
 
           {/* Right panel: Terminal Showcase */}
-          <div className="bg-paper-deep p-8 flex flex-col justify-between">
+          <div className="bg-paper-deep p-8 flex flex-col gap-6 min-w-0">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="font-mono text-xs text-muted uppercase tracking-wider flex items-center gap-2">
-                  <Terminal size={14} /> {active.tag} playback
+                  <Terminal size={14} /> {active.tag}
                 </span>
                 <button
                   onClick={() => handleCopy(active.cmd)}
-                  className="flex items-center gap-1.5 font-mono text-[10px] uppercase text-muted hover:text-ink border border-line bg-paper px-2 py-1 rounded transition-colors"
+                  className="pill-ghost !py-1 !px-3 !text-[11px] font-mono uppercase tracking-wider"
                 >
                   {copied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                   {copied ? 'copied' : 'copy'}
                 </button>
               </div>
-
-              <p className="text-[14px] text-ink-soft mb-6 leading-relaxed">
+              <p className="text-[14px] text-ink-soft leading-relaxed max-w-lg">
                 {active.desc}
               </p>
             </div>
 
-            {/* Terminal Window */}
-            <div className="rounded-xl overflow-hidden shadow-xl border border-line bg-ink text-paper text-[13px] font-mono">
-              <div className="px-4 py-2 border-b border-paper/10 flex items-center gap-1.5 select-none bg-ink-soft/40">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                <span className="text-[10px] text-paper/40 ml-2">console · {active.lang}</span>
-              </div>
-              <pre className="p-5 overflow-x-auto leading-relaxed select-all no-scrollbar max-h-[220px]">
-                <code>{active.cmd}</code>
+            <ConsoleWindow title={active.lang} className="flex-1">
+              <pre className="p-6 overflow-x-auto font-mono text-[12.5px] leading-[1.9] select-all no-scrollbar" style={{ color: 'rgba(250,249,246,0.85)' }}>
+                <code>
+                  {active.cmd.split('\n').map((line, i) => {
+                    let color = 'rgba(250,249,246,0.8)'
+                    if (line.startsWith('$')) color = '#faf9f6'
+                    else if (line.includes('[FAIL]') || line.includes('exit code 1')) color = '#ff8a55'
+                    else if (line.includes('VERIFY OK') || line.includes('exit 0')) color = '#7dc383'
+                    else if (line.startsWith('[')) color = 'rgba(250,249,246,0.55)'
+                    return (
+                      <div key={i} style={{ color }}>
+                        {line.startsWith('$') ? <><span style={{ color: '#7dc383' }}>$</span>{line.slice(1)}</> : (line || ' ')}
+                      </div>
+                    )
+                  })}
+                </code>
               </pre>
-            </div>
+            </ConsoleWindow>
           </div>
         </div>
       </div>

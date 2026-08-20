@@ -54,11 +54,20 @@ export default function Surfaces() {
           happens. Composable, digest-pinned, and fully re-derivable.
         </p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl overflow-hidden bg-line border border-line">
-          {cards.map((c, ci) => (
-            <div 
-              key={c.name} 
-              className={`reveal hover:scale-[1.01] transition-transform duration-300 p-7 flex flex-col gap-4 reveal-delay-${ci * 100}`} 
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 rounded-2xl overflow-hidden border border-line">
+          {cards.map((c, ci) => {
+            // explicit dividers per breakpoint — a 1px grid gap rounds away
+            // at fractional column widths
+            const dividers = [
+              'border-b sm:border-r lg:border-b-0',
+              'border-b lg:border-r lg:border-b-0',
+              'border-b sm:border-b-0 sm:border-r',
+              '',
+            ][ci]
+            return (
+            <div
+              key={c.name}
+              className={`reveal hover:scale-[1.01] transition-transform duration-300 p-7 flex flex-col gap-4 border-line ${dividers} reveal-delay-${ci * 100}`}
               style={{ background: 'var(--paper-deep)' }}
             >
               {/* dithered dot-grid glyph, one per card */}
@@ -86,7 +95,7 @@ export default function Surfaces() {
                 {c.mono}
               </code>
             </div>
-          ))}
+          )})}
         </div>
       </div>
     </section>

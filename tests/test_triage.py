@@ -257,3 +257,24 @@ def test_policy_bar_opens_the_gate_and_discloses_itself(tmp_path, monkeypatch):
     assert r_policy.gate.verdict.decision == "SKIP_SAFE"
     md = render_markdown(r_policy)
     assert "policy bar" in md and "0.30" in md and "0.95" in md
+
+
+def test_config_only_prs_are_never_cleared(monkeypatch):
+    """A workflow-only PR can change WHICH tests run — needs-human, not
+    out-of-scope-with-no-objection. Pure docs stay out-of-scope."""
+    import friction.triage as tri
+
+    def fake_files(slug, number, token=None):
+        return [".github/workflows/ci.yml"], True
+
+    monkeypatch.setattr(tri, "_pr_files", fake_files)
+    r = tri.triage("https://github.com/o/r/pull/11")
+    assert r.tier == "needs-human"
+    assert "test-execution configuration" in r.blurb
+
+    def fake_docs(slug, number, token=None):
+        return ["README.md", "docs/guide.md"], True
+
+    monkeypatch.setattr(tri, "_pr_files", fake_docs)
+    r2 = tri.triage("https://github.com/o/r/pull/11")
+    assert r2.tier == "out-of-scope"

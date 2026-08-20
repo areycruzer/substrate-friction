@@ -54,7 +54,7 @@ runs:
                  | sed -n 's/^threshold:[[:space:]]*//p' | tr -d '"' || true)
           if [ -n "$POL" ]; then THR="--threshold $POL"; fi
         fi
-        uvx --from "git+https://github.com/areycruzer/substrate-friction@603f68e00aaf98a074f091eba088b0a42f505ce0" \
+        uvx --from "git+https://github.com/areycruzer/substrate-friction@dcee8dce4f16f5844866a95cb4305801cf068f18" \
           friction triage "$PR_URL" $THR --json-out triage.json > comment.md
         code=$?
         set -e

@@ -120,6 +120,15 @@ def parse_target(url: str) -> tuple[str, str, int]:
     return m.group(1), kind, int(m.group(3))
 
 
+# Files that can change WHICH tests run, without any .py in the surface.
+# The gate cannot measure their effect on selection — such a PR is blind,
+# never "cleared": a workflow edit can silently alter the suite itself.
+SELECTION_INFLUENCING = (
+    ".github/", "conftest.py", "pytest.ini", "tox.ini", "setup.cfg",
+    "pyproject.toml", "noxfile.py", "Makefile",
+)
+
+
 PR_FILE_PAGE = 100
 PR_FILE_CAP = 300   # beyond this the change surface is disclosed-truncated
 
@@ -236,9 +245,22 @@ def triage(url: str, *, token: str | None = None,
             blurb=f"the change surface was truncated at the {PR_FILE_CAP}-file"
             " pagination cap — insufficient evidence to measure, a human "
             "triages this", gate=None, localization_note=note)
-    # 2c. a PR with no Python in the surface genuinely has nothing to
-    # measure — out of scope, no clone, no graph.
+    # 2c. no Python — but a change that can influence WHICH tests run
+    # (CI workflows, pytest/tox config) is blind, not cleared: needs-human.
     if not any(f.endswith(".py") for f in changed):
+        influencing = [f for f in changed
+                       if any(m in f for m in SELECTION_INFLUENCING)]
+        if influencing:
+            shown = ", ".join(influencing[:3])
+            return TriageReport(
+                kind=kind, slug=slug, number=number, head="—",
+                changed=tuple(changed), tier="needs-human",
+                label=TIERS["needs-human"],
+                blurb="this change touches test-execution configuration "
+                f"({shown}) — it can alter WHICH tests run, the gate "
+                "cannot measure that effect, so a human verifies. "
+                "Never 'cleared'.", gate=None,
+                localization_note=note)
         return TriageReport(
             kind=kind, slug=slug, number=number, head="—",
             changed=tuple(changed), tier="out-of-scope",

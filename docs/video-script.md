@@ -1,81 +1,66 @@
-# Video narration — FINAL (plain-language cut, with the bot beat)
+# Video narration — AS-RECORDED cut (2:12 silent master)
 
-**The master production doc is `docs/video-production.md`** — shots,
-timings, edit plan, rubric map. This file is the narration alone, for
-reading aloud at the mic. ~436 words ≈ 2:49 at a brisk pace.
+The footage is recorded and assembled (`substrate-friction-demo-silent.mp4`,
+2:12, nine beats). This is the narration to read over it — ~305 words at a
+calm ~150 wpm, fitted to the actual segment boundaries. Record in one quiet
+take on your phone; breathe at the `·` marks; the timestamps tell you when
+the screen changes underneath you.
 
-Speak from `docs/MINDMAP.md`'s glossary: map, seatbelt, hit rate,
-run everything, triage. Screens stay technical; your voice stays human.
+**Rule that survives every edit: speak only numbers the frame shows.**
 
-## SHOT 0 — cold open (0:00)
+## 0:00–0:12 · cold open — the 0-of-370 screen types itself
 
-> "An AI tool just used its map of this code to pick which tests to run.
-> The map says: done. It found **zero** of the **three hundred and seventy**
-> tests that would catch this bug. Substrate Friction is the seatbelt that
-> stops this."
+> "An AI tool just used its map of this code to decide which tests to
+> run. · A real Django bug — three hundred seventy tests would catch it. ·
+> The map found **zero**."
 
-## SHOT 1 — the problem (0:12)
+## 0:12–0:33 · FastAPI, one command, exit code 1
 
-> "Every AI coding tool draws a map of your code and trusts it to skip
-> tests. The trap: a map can be perfectly drawn — and still missing roads a
-> tool can never warn you about."
+> "This is Substrate Friction. One command, on FastAPI — a stranger's
+> repo. It builds the map, walks backwards from the change, and finds
+> twenty-three of seven hundred ninety-nine tests. · The verdict: run
+> everything — this class of map, measured, catches only half. · Exit code
+> one blocks the merge."
 
-## SHOT 2 — what we built + the bot (0:32)
+## 0:33–0:52 · the executor (banner beat)
 
-> "We started out predicting which tickets AI fails at. Our own rules
-> killed that idea — so we asked a simpler question: is the map any good?
-> Nobody had checked. We built the checker — the code mapped two ways, a
-> HydraDB engine measuring, a seatbelt deciding — shipped five ways:
-> command line, API, a tool the AI itself can ask, a security finding, and
-> a bot that installs on any repo in ten lines and triages every pull
-> request: safe for AI, or needs a human."
+> "The executor. The same command hands you the exact pytest line for the
+> selected few — and the full-suite fallback right beside it, always. · At
+> today's measured hit rate, the fallback IS the safety net. Nothing is
+> skipped on an unmeasured map."
 
-## SHOT 3 — the numbers (1:04)
+## 0:52–1:04 · the bot on a real PR
 
-> "Tested against one hundred seventy-two real bug fixes: the map most
-> tools use finds the bug-catching test thirty-one percent of the time. The
-> careful map: forty-two. On two major projects: **never**. And across
-> eight years of Django it never improved. Not a bug that ages out — it's
-> how the map is made."
+> "And it's a bot. Ten lines of YAML on any repo. · This real pull request
+> earned the AI-autonomy label — under a policy bar the operator
+> disclosed."
 
-## SHOT 4a — the gate (1:26)
+## 1:04–1:25 · the wow — HydraDB proves it live
 
-> "The seatbelt: hit rate measured, bar at ninety-five percent, verdict —
-> run everything. Exit code one blocks the merge."
+> "Now the wow. We load sixty-one thousand connections into HydraDB,
+> live — and the graph database runs the check itself. Milliseconds. ·
+> Parity: true — the engine independently reproduces our answer, then
+> proves the miss: one guarding test, dropped. · Not our word. The
+> database's."
 
-## SHOT 4b — live in the engine (1:34)
+## 1:25–1:36 · verify
 
-> "Now the graph database does it itself: sixty-one thousand connections
-> loaded live, the check runs **inside HydraDB** in two-point-six
-> milliseconds, matching our answer exactly — or refusing to answer at all."
+> "Is this real? One command re-derives every number — the graphs, the
+> corpus, the site — and fails loudly if a single figure drifts. ·
+> Verify: OK."
 
-## SHOT 4c — the bot on a stranger's PR (1:50)
+## 1:36–1:47 · the distance table
 
-> "Here's the bot on a real FastAPI pull request it has never seen.
-> Verdict in seconds: needs a human — start with this one test of three
-> hundred sixteen. Even saying no, it hands the reviewer a head start."
+> "We even published the distance to autonomy: every graph class, its
+> bound, its gap. Two projects at zero. · Honesty is the product."
 
-*(If your live run prints different numbers — the PR moved — speak the
-numbers on YOUR screen. Never dub a number the frame doesn't show.)*
+## 1:47–2:00 · the walkthrough
 
-## SHOT 4d — the agent abstains (2:07)
+> "The walkthrough shows a real bug end to end — committed, verbatim
+> records. The page runs nothing and requires nothing."
 
-> "And an AI agent asks the seatbelt before trusting its own map — and
-> backs off. That's the safety signal agents can't generate for
-> themselves."
+## 2:00–2:12 · close on the README
 
-## SHOT 5 — HydraDB (2:16)
-
-> "HydraDB holds both maps at once and answers in milliseconds where the
-> naive approach hit a thirty-second wall. Even our headline number is computed in-engine,
-> reproduced exactly or not at all. We pinned the build and sent four
-> findings upstream — including one we got wrong and
-> publicly retracted."
-
-## SHOT 6 — proof + potential (2:35)
-
-> "Is this real? We broke our own meter on purpose — the score falls to
-> zero, as it should. We published the predictions that came back wrong,
-> scored ourselves out of a hundred, and showed every receipt. One command
-> re-derives every number you just watched. Substrate Friction: measure the
-> map before you trust it."
+> "Substrate Friction. Agent triage, measured: does this edit need a
+> human — or can the AI handle it? · Measure the map — before you trust
+> it."

@@ -1,5 +1,11 @@
 # VIDEO PRODUCTION PACKAGE — the whole thing, shot by shot (FINAL)
 
+> **STATUS: footage recorded and assembled.** The 2:12 silent master
+> (`substrate-friction-demo-silent.mp4`) was recorded live — every command
+> real, screen-captured, machine-cut. The as-recorded narration with final
+> timestamps lives in `docs/video-script.md`; the plan below is the
+> reference it was shot from.
+
 Hard cap **3:00**. Target cut **2:50–2:55**. Narration below is **~436
 words** (≈2:49 at a brisk 155 wpm — rehearse once with a timer; trim
 guidance at the bottom if you land hot).

@@ -1,66 +1,78 @@
-# Video narration — AS-RECORDED cut (2:12 silent master)
+# Video narration — FINAL v3 (fitted to the 2:51 machine-cut master)
 
-The footage is recorded and assembled (`substrate-friction-demo-silent.mp4`,
-2:12, nine beats). This is the narration to read over it — ~305 words at a
-calm ~150 wpm, fitted to the actual segment boundaries. Record in one quiet
-take on your phone; breathe at the `·` marks; the timestamps tell you when
-the screen changes underneath you.
+Read over `substrate-friction-demo-v3-silent.mp4` (2:51). ~395 words at a
+calm 150 wpm — it fits with breathing room. The timestamps are when the
+screen changes under you; the `·` marks are breaths. Record in one quiet
+take on your phone, then hand the audio file back for muxing.
 
-**Rule that survives every edit: speak only numbers the frame shows.**
+**Rule: speak only numbers the frame shows.**
 
-## 0:00–0:12 · cold open — the 0-of-370 screen types itself
+## 0:00–0:08 · landing hero
+> "Every AI coding agent navigates your code with a map — and decides
+> which tests to run by trusting it."
 
-> "An AI tool just used its map of this code to decide which tests to
-> run. · A real Django bug — three hundred seventy tests would catch it. ·
-> The map found **zero**."
+## 0:08–0:16 · the quote
+> "Everyone is making agents smarter. We asked the cheaper question nobody
+> asked: · is the map itself any good?"
 
-## 0:12–0:33 · FastAPI, one command, exit code 1
+## 0:16–0:26 · the missing-edges graph
+> "Here's the trap: your program has edges the map never recorded. The
+> agent can finish its walk perfectly — and still miss the road that
+> mattered."
 
-> "This is Substrate Friction. One command, on FastAPI — a stranger's
-> repo. It builds the map, walks backwards from the change, and finds
-> twenty-three of seven hundred ninety-nine tests. · The verdict: run
-> everything — this class of map, measured, catches only half. · Exit code
-> one blocks the merge."
+## 0:26–0:40 · a gate under the agent
+> "So we built substrate—friction — a gate under the agent. It measures
+> whether the map reaches the tests guarding a change, and when it can't
+> prove safety, it refuses. · CLI, API, MCP tool, GitHub bot."
 
-## 0:33–0:52 · the executor (banner beat)
+## 0:40–0:52 · terminal: 0 of 370
+> "The evidence. A real Django bug, human-verified: three hundred seventy
+> tests would catch it. The map completes its walk — and selects
+> **zero**. · A tool skipping on this map ships the bug silently."
 
-> "The executor. The same command hands you the exact pytest line for the
-> selected few — and the full-suite fallback right beside it, always. · At
-> today's measured hit rate, the fallback IS the safety net. Nothing is
-> skipped on an unmeasured map."
+## 0:52–1:04 · terminal: FastAPI verdict, exit 1
+> "On FastAPI, live: the gate builds the map, selects twenty-three of
+> seven hundred ninety-nine tests — and refuses to certify the skip,
+> because this map class measures fifty percent. Exit one blocks the
+> merge."
 
-## 0:52–1:04 · the bot on a real PR
+## 1:04–1:18 · terminal: the executor
+> "The executor turns the verdict into commands: the exact pytest line for
+> the selected few — and the full-suite fallback always beside it. ·
+> Nothing is skipped on an unmeasured map. That's the invariant."
 
-> "And it's a bot. Ten lines of YAML on any repo. · This real pull request
-> earned the AI-autonomy label — under a policy bar the operator
-> disclosed."
+## 1:18–1:27 · the PR list, every label
+> "And it's not a demo — the bot runs this repo. Every pull request gets
+> triaged and labeled, automatically."
 
-## 1:04–1:25 · the wow — HydraDB proves it live
+## 1:27–1:41 · the ai-autonomy PR
+> "This one earned AI-autonomy: eleven of six hundred forty-six tests in
+> the blast radius, safe to skip — under a policy bar the operator
+> disclosed, with the full evidence in the comment."
 
-> "Now the wow. We load sixty-one thousand connections into HydraDB,
-> live — and the graph database runs the check itself. Milliseconds. ·
-> Parity: true — the engine independently reproduces our answer, then
-> proves the miss: one guarding test, dropped. · Not our word. The
-> database's."
+## 1:41–1:57 · the engine proves it live
+> "Now the part that makes this HydraDB-native. Sixty-one thousand edges
+> load into the engine, live — and the database runs the check itself, in
+> milliseconds. Parity: true. The engine reproduces our answer and proves
+> the dropped test. · Not our word — the database's."
 
-## 1:25–1:36 · verify
+## 1:57–2:05 · verify
+> "Every number you've seen re-derives from committed data with one
+> command. It fails loudly if anything drifts."
 
-> "Is this real? One command re-derives every number — the graphs, the
-> corpus, the site — and fails loudly if a single figure drifts. ·
-> Verify: OK."
+## 2:05–2:15 · the distance table
+> "And we published the distance to autonomy for every graph class —
+> bounds, gaps, and the projects at zero. · Honesty is the product."
 
-## 1:36–1:47 · the distance table
+## 2:15–2:29 · the walkthrough
+> "The walkthrough tells the whole story on one page — a real bug, real
+> commands, verbatim records. It runs nothing and requires nothing."
 
-> "We even published the distance to autonomy: every graph class, its
-> bound, its gap. Two projects at zero. · Honesty is the product."
+## 2:29–2:41 · the repository
+> "It's all open: one hundred seventy-two labelled bug fixes, seven
+> repositories, five pre-registered studies, and four findings filed
+> upstream to HydraDB itself."
 
-## 1:47–2:00 · the walkthrough
-
-> "The walkthrough shows a real bug end to end — committed, verbatim
-> records. The page runs nothing and requires nothing."
-
-## 2:00–2:12 · close on the README
-
-> "Substrate Friction. Agent triage, measured: does this edit need a
-> human — or can the AI handle it? · Measure the map — before you trust
-> it."
+## 2:41–2:51 · closing
+> "substrate—friction. The certification gate for agent test selection. ·
+> Measure the map — before you trust it."

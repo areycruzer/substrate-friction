@@ -1,6 +1,11 @@
 # VIDEO PRODUCTION PACKAGE — the whole thing, shot by shot (FINAL)
 
-> **STATUS: footage recorded and assembled.** The 2:12 silent master
+> **STATUS v3: final footage recorded and assembled** — the 2:51 pitch cut
+> (`substrate-friction-demo-v3-silent.mp4`): landing-scroll intro, terminal
+> proof, the PR list with every bot label, the live-engine parity shot, and
+> the closing. Narration fitted to it: `docs/video-script.md`.
+>
+> Previous status: footage recorded and assembled. The 2:12 silent master
 > (`substrate-friction-demo-silent.mp4`) was recorded live — every command
 > real, screen-captured, machine-cut. The as-recorded narration with final
 > timestamps lives in `docs/video-script.md`; the plan below is the

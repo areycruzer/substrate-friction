@@ -5,13 +5,13 @@
 @tailwind utilities;
 
 :root {
-  --paper: #d7d7d0;
-  --paper-deep: #cbcbc3;
-  --ink: #1a1614;
-  --ink-soft: #4a453f;
-  --muted: #7a756d;
-  --cream: #f4f4e7;
-  --line: rgba(26, 22, 20, 0.14);
+  --paper: #d4d3cb;
+  --paper-deep: #dcdbd3;
+  --ink: #161413;
+  --ink-soft: #4a4642;
+  --muted: #838077;
+  --cream: #faf9f6;
+  --line: rgba(22, 20, 19, 0.12);
   --accent: #ff571a;
 }
 
@@ -59,27 +59,56 @@ body::before {
   background: var(--ink);
   color: var(--cream);
   border-radius: 9999px;
-  padding: 8px 18px;
-  font-size: 14px;
+  padding: 10px 24px;
+  font-size: 14.5px;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background 0.2s, transform 0.2s;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.pill-dark:hover { background: #000; transform: translateY(-1px); }
+.pill-dark:hover {
+  background: #000;
+  transform: scale(1.02);
+}
+.pill-dark:active {
+  transform: scale(0.98);
+}
+
+.pill-dashed {
+  position: relative;
+  background: var(--paper-deep);
+  color: var(--ink);
+  border-radius: 9999px;
+  border: 1px dashed rgba(13, 12, 11, 0.22);
+  padding: 10px 24px;
+  font-size: 14.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pill-dashed:hover {
+  background: rgba(13, 12, 11, 0.04);
+  border-color: var(--ink);
+  transform: scale(1.02);
+}
+.pill-dashed:active {
+  transform: scale(0.98);
+}
 
 .pill-ghost {
   border: 1px solid var(--line);
   color: var(--ink);
   border-radius: 9999px;
-  padding: 8px 18px;
-  font-size: 14px;
+  padding: 10px 24px;
+  font-size: 14.5px;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: border-color 0.2s, background 0.2s;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .pill-ghost:hover { border-color: var(--ink); background: rgba(26,22,20,0.04); }
 
@@ -96,12 +125,26 @@ body::before {
 }
 
 /* scroll reveal */
-@keyframes rise-in {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1), transform 1.0s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
-.reveal { opacity: 0; }
-.reveal.in { animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* stagger delays */
+.reveal-delay-50 { transition-delay: 50ms; }
+.reveal-delay-100 { transition-delay: 100ms; }
+.reveal-delay-150 { transition-delay: 150ms; }
+.reveal-delay-200 { transition-delay: 200ms; }
+.reveal-delay-250 { transition-delay: 250ms; }
+.reveal-delay-300 { transition-delay: 300ms; }
+.reveal-delay-400 { transition-delay: 400ms; }
+.reveal-delay-500 { transition-delay: 500ms; }
 
 /* gap chart line draw */
 @keyframes draw-line { to { stroke-dashoffset: 0; } }
@@ -120,10 +163,10 @@ body::before {
 .glass-pill {
   position: relative;
   border-radius: 999px;
-  background: rgba(232, 232, 228, 0.65);
+  background: rgba(240, 239, 234, 0.7);
   backdrop-filter: blur(3px) saturate(180%) brightness(108%);
   -webkit-backdrop-filter: blur(3px) saturate(180%) brightness(108%);
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
 }
 .glass-pill::before {
   content: '';
@@ -178,3 +221,61 @@ body::before {
   .reveal.in, .in .chart-line, .ticker-track, .status-dot { animation: none; }
   .chart-line { stroke-dashoffset: 0; }
 }
+
+/* Bento Grid Borders */
+.grid-border-r {
+  border-right: 1px solid var(--line);
+}
+.grid-border-b {
+  border-bottom: 1px solid var(--line);
+}
+.grid-border-t {
+  border-top: 1px solid var(--line);
+}
+.grid-border-l {
+  border-l: 1px solid var(--line);
+}
+
+/* Hide scrollbars for sliders but allow scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Custom Bento/Landing Boxes ── */
+.box-dark {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.box-dark:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 50px -12px rgba(13, 12, 11, 0.35);
+}
+
+.box-dashed {
+  position: relative;
+  background: rgba(242, 240, 232, 0.45);
+  color: var(--ink);
+  border: 1px dashed rgba(13, 12, 11, 0.18);
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.box-dashed:hover {
+  background: rgba(242, 240, 232, 0.75);
+  border-color: var(--ink);
+  transform: translateY(-4px);
+}
+

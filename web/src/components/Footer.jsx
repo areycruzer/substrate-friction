@@ -61,16 +61,11 @@ export default function Footer() {
         {/* Status row */}
         <div className="rule pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
           <div className="flex items-center gap-2">
-            <span className="status-dot w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />
+            <span className="status-dot w-2 h-2 rounded-full bg-accent" />
             <span className="micro-label" style={{ color: 'var(--ink)' }}>ALL GATES REFUSING · RUN_FULL</span>
           </div>
           <span className="micro-label">ENGINE DIGEST-PINNED · db78309a · COMMIT 02a40025</span>
           <span className="micro-label">BUILT ON HYDRADB</span>
-        </div>
-
-        {/* Wordmark */}
-        <div className="font-serif-display text-[13vw] leading-[0.95] text-center select-none" style={{ color: 'rgba(26,22,20,0.9)' }}>
-          substrate<span style={{ color: 'var(--accent)' }}>—</span>friction
         </div>
       </div>
 

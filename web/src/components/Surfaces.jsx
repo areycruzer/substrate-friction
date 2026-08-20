@@ -27,12 +27,25 @@ const cards = [
   },
 ]
 
+import DitherEffect from './DitherEffect'
+
 export default function Surfaces() {
   const ref = useReveal()
   return (
-    <section ref={ref} id="surfaces" className="py-24 rule">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="reveal mb-4 micro-label">04 / YOUR STACK IS OUR STACK</div>
+    <section ref={ref} id="surfaces" className="relative py-24 rule overflow-hidden">
+      {/* Faint Dither Shader Background */}
+      <div className="absolute inset-0 pointer-events-none z-0" style={{ opacity: 0.4 }}>
+        <DitherEffect 
+          background="#d4d3cb" 
+          colors={["#ebeae2", "#bebdb2", "#a8a79d"]} 
+          density={60} 
+          scale={25}
+          size={30}
+        />
+      </div>
+
+      <div className="relative max-w-6xl mx-auto px-6 z-10">
+        <div className="reveal mb-4 micro-label">04 / SURFACES</div>
         <h2 className="reveal font-serif-display text-[36px] sm:text-[44px] leading-[1.1] mb-4" style={{ color: 'var(--ink)' }}>
           One measurement.<br />Four surfaces.
         </h2>
@@ -41,11 +54,15 @@ export default function Surfaces() {
           happens. Composable, digest-pinned, and fully re-derivable.
         </p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl overflow-hidden" style={{ background: 'var(--line)' }}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl overflow-hidden bg-line border border-line">
           {cards.map((c, ci) => (
-            <div key={c.name} className="reveal lift p-7 flex flex-col gap-4" style={{ background: 'var(--paper)' }}>
+            <div 
+              key={c.name} 
+              className={`reveal hover:scale-[1.01] transition-transform duration-300 p-7 flex flex-col gap-4 reveal-delay-${ci * 100}`} 
+              style={{ background: 'var(--paper-deep)' }}
+            >
               {/* dithered dot-grid glyph, one per card */}
-              <svg viewBox="0 0 64 40" className="w-16 h-10" aria-hidden="true">
+              <svg viewBox="0 0 64 40" className="w-16 h-10 mb-2" aria-hidden="true">
                 {Array.from({ length: 8 }, (_, row) =>
                   Array.from({ length: 13 }, (_, col) => {
                     const cx = 4 + col * 4.6, cy = 4 + row * 4.6
@@ -65,7 +82,7 @@ export default function Surfaces() {
               <div className="micro-label" style={{ color: 'var(--accent)' }}>{c.tag}</div>
               <h3 className="font-serif-display text-[28px]" style={{ color: 'var(--ink)' }}>{c.name}</h3>
               <p className="text-[14px] leading-[1.7] flex-1" style={{ color: 'var(--ink-soft)' }}>{c.body}</p>
-              <code className="text-[11px] px-3 py-2 rounded-lg" style={{ fontFamily: "'Geist Mono', monospace", background: 'rgba(26,22,20,0.06)', color: 'var(--ink-soft)' }}>
+              <code className="text-[11px] px-3 py-2 rounded-lg" style={{ fontFamily: "'Geist Mono', monospace", background: 'rgba(13,12,11,0.05)', color: 'var(--ink-soft)' }}>
                 {c.mono}
               </code>
             </div>

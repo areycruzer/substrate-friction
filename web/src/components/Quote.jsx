@@ -3,7 +3,7 @@ import useReveal from '../useReveal'
 export default function Quote() {
   const ref = useReveal()
   return (
-    <section ref={ref} className="py-24 rule">
+    <section ref={ref} id="quote" className="py-24 rule">
       <div className="max-w-3xl mx-auto px-6 text-center">
         <div className="reveal font-serif-display text-[64px] leading-none mb-2" style={{ color: 'var(--accent)' }}>“</div>
         <blockquote className="reveal font-serif-display text-[28px] sm:text-[34px] leading-[1.25]" style={{ color: 'var(--ink)' }}>

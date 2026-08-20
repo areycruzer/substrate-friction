@@ -30,7 +30,7 @@ const posts = [
 export default function ResearchLog() {
   const ref = useReveal()
   return (
-    <section ref={ref} id="log" className="py-24 rule">
+    <section ref={ref} id="research-log" className="py-24 rule">
       <div className="max-w-6xl mx-auto px-6">
         <div className="reveal flex items-end justify-between mb-14">
           <div>
@@ -39,26 +39,51 @@ export default function ResearchLog() {
               From the measurement log.
             </h2>
           </div>
-          <a href="https://github.com/areycruzer/substrate-friction/blob/main/docs/studies.md" className="pill-ghost hidden sm:inline-flex">View all studies</a>
+          <a 
+            href="https://github.com/areycruzer/substrate-friction/blob/main/docs/studies.md" 
+            className="pill-dashed hidden sm:inline-flex group"
+          >
+            {/* Corner Brackets */}
+            <span className="absolute top-[-3px] left-[-3px] w-1.5 h-1.5 border-t border-l border-ink/40 group-hover:border-accent group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
+            <span className="absolute top-[-3px] right-[-3px] w-1.5 h-1.5 border-t border-r border-ink/40 group-hover:border-accent group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
+            <span className="absolute bottom-[-3px] left-[-3px] w-1.5 h-1.5 border-b border-l border-ink/40 group-hover:border-accent group-hover:-translate-x-0.5 group-hover:translate-y-0.5 transition-all duration-300" />
+            <span className="absolute bottom-[-3px] right-[-3px] w-1.5 h-1.5 border-b border-r border-ink/40 group-hover:border-accent group-hover:translate-x-0.5 group-hover:translate-y-0.5 transition-all duration-300" />
+            View all studies
+          </a>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-10">
-          {posts.map(p => (
-            <a key={p.title} href={p.href} className="reveal lift group block rounded-xl p-4 -m-4">
-              <div className="rule pt-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="micro-label" style={{ color: 'var(--accent)' }}>{p.tag}</span>
-                  <span className="micro-label">{p.date}</span>
+        <div className="grid md:grid-cols-3 gap-8">
+          {posts.map((p, idx) => (
+            <a 
+              key={p.title} 
+              href={p.href} 
+              className={`reveal group block border border-line rounded-xl overflow-hidden bg-paper-deep/60 hover:scale-[1.01] hover:bg-paper-deep transition-all duration-300 shadow-sm reveal-delay-${idx * 100}`}
+            >
+              <div className="p-6 flex flex-col justify-between h-full min-h-[300px]">
+                <div>
+                  <div className="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-line/60">
+                    <span className="micro-label" style={{ color: 'var(--accent)' }}>{p.tag}</span>
+                    <span className="micro-label text-muted">{p.date}</span>
+                  </div>
+                  <h3 className="font-serif-display text-[24px] leading-[1.2] mb-4 group-hover:text-accent transition-colors duration-200" style={{ color: 'var(--ink)' }}>
+                    {p.title}
+                  </h3>
+                  <p className="text-[14.5px] leading-[1.65] mb-6 text-ink-soft">
+                    {p.body}
+                  </p>
                 </div>
-                <h3 className="font-serif-display text-[24px] leading-[1.2] mb-3 group-hover:underline" style={{ color: 'var(--ink)' }}>
-                  {p.title}
-                </h3>
-                <p className="text-[14px] leading-[1.7] mb-4" style={{ color: 'var(--ink-soft)' }}>{p.body}</p>
-                <span className="micro-label">{p.read}</span>
+                
+                <div className="flex items-center justify-between pt-4 border-t border-line/40">
+                  <span className="font-mono text-[10px] text-muted tracking-wider uppercase">{p.read}</span>
+                  <span className="font-mono text-[10px] text-accent uppercase tracking-wider group-hover:translate-x-1 transition-transform duration-200">
+                    Read study →
+                  </span>
+                </div>
               </div>
             </a>
           ))}
         </div>
+
       </div>
     </section>
   )

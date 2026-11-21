@@ -34,6 +34,20 @@ def test_health_returns_200_and_pinned_commit(client):
     assert len(body["pinned_commit"]) >= 40        # a git sha
 
 
+def test_health_does_not_leak_the_engine_error(monkeypatch):
+    import friction.client
+
+    def _boom(*_a, **_k):
+        raise RuntimeError("secret-host:7687 refused, token=abc")
+
+    monkeypatch.setattr(friction.client, "connect", _boom)
+    body = TestClient(create_app(live=True)).get("/health").json()
+    assert body["engine_reachable"] is False
+    assert "secret-host" not in body["detail"]
+    assert "token" not in body["detail"]
+    assert body["detail"] == "engine unreachable"
+
+
 # --------------------------------------------------------------------------
 # /instances
 # --------------------------------------------------------------------------

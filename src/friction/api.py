@@ -27,6 +27,7 @@ is always present on ``/check``, and the undirected number is never described as
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import asdict
 from pathlib import Path
@@ -37,6 +38,8 @@ from friction import cli
 from friction.precision import load_report, project_localization_cost
 
 PINNED_COMMIT_PATH = Path("docs/pinned-engine-commit.txt")
+
+log = logging.getLogger(__name__)
 
 
 def _pinned_commit() -> str:
@@ -112,9 +115,10 @@ def create_app(live: bool = True) -> FastAPI:
             transport.close()
             return {"engine_reachable": True, "transport": name,
                     "pinned_commit": commit, "detail": "ok"}
-        except Exception as exc:                   # noqa: BLE001 - engine optional
+        except Exception:                          # noqa: BLE001 - engine optional
+            log.exception("engine probe failed")
             return {"engine_reachable": False, "transport": None,
-                    "pinned_commit": commit, "detail": str(exc)[:200]}
+                    "pinned_commit": commit, "detail": "engine unreachable"}
 
     @app.get("/gate")
     def gate_corpus(arm: str = "arm_b", k: int = 6,

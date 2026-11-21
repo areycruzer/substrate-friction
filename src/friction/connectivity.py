@@ -25,6 +25,7 @@ a test reaches the code it exercises through machinery no `CALLS` edge records.
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
@@ -74,6 +75,19 @@ def connected_within(g: nx.DiGraph, srcs: Iterable[int], dsts: Iterable[int],
         visited |= nxt
         frontier = nxt
     return False
+
+
+def instance_dir(root: Path | str, instance_id: str) -> Path:
+    """``root/instance_id``, refusing ids that would leave ``root``.
+
+    Instance ids reach here from HTTP path parameters, so an id such as
+    ``..`` or an absolute path must not select a file outside the corpus.
+    """
+    base = os.path.abspath(root)
+    full = os.path.normpath(os.path.join(base, instance_id))
+    if not full.startswith(base + os.sep):
+        raise ValueError(f"invalid instance id: {instance_id!r}")
+    return Path(full)
 
 
 def load_graph(edges_path: Path) -> nx.DiGraph:

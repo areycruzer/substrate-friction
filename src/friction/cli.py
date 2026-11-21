@@ -43,6 +43,7 @@ import networkx as nx
 
 from friction import features as _features
 from friction.config import Settings
+from friction.connectivity import instance_dir
 from friction.connectivity import load_graph as _load_graph
 from friction.paths import build_mspaths_cypher
 from friction.probe import Capabilities, load_capabilities
@@ -91,6 +92,14 @@ def _arms_path(name: str) -> Path:
     """
     working = Path("data/instances/arms") / name
     return working if working.exists() else Path("data/shipped/arms") / name
+
+
+def _instance_base(instance_id: str) -> Path:
+    """``_arms_path`` for an instance directory, with the id kept inside the
+    arms root. Raises ``ValueError`` for an id that would escape it."""
+    working = instance_dir("data/instances/arms", instance_id)
+    return working if working.exists() else instance_dir("data/shipped/arms",
+                                                         instance_id)
 
 
 MANIFEST_PATH = _arms_path("manifest.jsonl")
@@ -450,8 +459,8 @@ def load_instance_graph(instance_id: str, arm: str = "arm_b") -> nx.DiGraph:
     the shipped copy. Returns an empty graph when neither exists so ``check`` can
     still print the endpoints and the recommendation without an exception.
     """
-    base = _arms_path(instance_id)          # data/{instances,shipped}/arms/<id>
-    plain = base / arm / "edges.ndjson"
+    base = _instance_base(instance_id)      # data/{instances,shipped}/arms/<id>
+    plain = instance_dir(base, arm) / "edges.ndjson"
     if plain.exists():
         return _load_graph(plain)
     gz = base / "edges.ndjson.gz"
@@ -476,8 +485,8 @@ def _instance_edge_rows(instance_id: str, arm: str,
     the ingested subgraph to the arm under test. Working arm-specific files are
     already single-band, so the filter is a no-op there.
     """
-    base = _arms_path(instance_id)
-    plain = base / arm / "edges.ndjson"
+    base = _instance_base(instance_id)
+    plain = instance_dir(base, arm) / "edges.ndjson"
     lo = band
     hi = band + 10_000_000_000            # bands are spaced 1e10 apart
     rows: list[dict] = []

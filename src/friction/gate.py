@@ -34,7 +34,7 @@ from typing import Iterable
 
 import networkx as nx
 
-from friction.connectivity import load_graph
+from friction.connectivity import instance_dir, load_graph
 
 # The bar for "safe to skip". Chosen, not measured: dropping the guarding test
 # 1 run in 20 is already a poor trade against the minutes a full suite costs.
@@ -164,10 +164,11 @@ def _edges_path(arms_root: Path, instance_id: str, arm: str) -> Path | None:
     safe to walk directly because the arms live in disjoint integer id bands,
     so no edge can cross from one arm into the other.
     """
-    per_arm = Path(arms_root) / instance_id / arm / "edges.ndjson"
+    base = instance_dir(arms_root, instance_id)
+    per_arm = instance_dir(base, arm) / "edges.ndjson"
     if per_arm.exists():
         return per_arm
-    merged = Path(arms_root) / instance_id / "edges.ndjson.gz"
+    merged = base / "edges.ndjson.gz"
     if merged.exists():
         return merged
     return None

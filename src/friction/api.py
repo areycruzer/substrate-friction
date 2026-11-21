@@ -168,7 +168,10 @@ def create_app(live: bool = True) -> FastAPI:
         entry = record.get(arm) or {}
         fix = list(entry.get("fix_site_ids") or [])
         tests = list(entry.get("test_target_ids") or [])
-        edges = _edges_path(manifest.parent, instance_id, arm)
+        try:
+            edges = _edges_path(manifest.parent, instance_id, arm)
+        except ValueError:
+            edges = None
         if edges is None:
             raise HTTPException(status_code=404,
                                 detail=f"no {arm} graph for {instance_id}")
@@ -206,7 +209,7 @@ def create_app(live: bool = True) -> FastAPI:
     def check(instance_id: str) -> dict:
         try:
             report = cli.gather_check(instance_id)
-        except KeyError:
+        except (KeyError, ValueError):
             raise HTTPException(
                 status_code=404,
                 detail=f"unknown instance id: {instance_id!r} — see /instances")
@@ -234,7 +237,7 @@ def create_app(live: bool = True) -> FastAPI:
     def compare(instance_id: str) -> dict:
         try:
             a, b, comparable = cli.compare(instance_id)
-        except KeyError:
+        except (KeyError, ValueError):
             raise HTTPException(
                 status_code=404,
                 detail=f"unknown instance id: {instance_id!r} — see /instances")

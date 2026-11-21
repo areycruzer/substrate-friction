@@ -12,7 +12,9 @@ services:
     # MinIO in this configuration. MinIO is kept only so the same compose file
     # can be flipped to an S3-compatible object store (CLOUD_PROVIDER=s3 with
     # the MinIO endpoint) without editing the topology. It is inert for the
-    # judge path and can be omitted with `docker compose up -d graph-node`.
+    # judge path, so it sits behind the "s3" profile and `docker compose up -d`
+    # starts graph-node alone; use `--profile s3` to bring it up.
+    profiles: ["s3"]
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     environment:
@@ -31,8 +33,6 @@ services:
     # against (docs/pinned-engine-commit.txt has the source commit).
     image: ghcr.io/hydra-db/hydradb@sha256:db78309a233be54662db29744047e985a39b51c45a270d1a1f47c31a62cdb709
     user: "10001:10001"
-    depends_on:
-      minio: { condition: service_started }
     environment:
       RUST_MIN_STACK: "33554432"
       # -----------------------------------------------------------------------

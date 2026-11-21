@@ -37,7 +37,7 @@ verbatim, six daily plans, all falsifications — is the museum wing,
 
 ## 3. "Code graphs are used for navigation and retrieval, not just test selection. You attack a universality the tools don't claim."
 **scoped.** We measure **test selection** only and claim nothing about
-navigation, retrieval, or context construction (see README, *What we do
+navigation, retrieval, or context construction (see [`story.md`](story.md#what-we-do-not-claim), *What we do
 not claim*). Selection is singled out because it is the one use where a
 wrong or missing edge **silently drops a test that guards the change** —
 navigation errors are visible, selection errors are not. On the

@@ -20,7 +20,7 @@ The arc they record:
    engine timed out at 30 s; the first two AUCs (0.565, 0.631) fell to
    measurement artifacts and were retracted; the fair leave-one-repo-out test
    at n=172 landed at **0.483 — at or below chance** — and patch size beat
-   every structural feature, significantly (README, "Retracted results, kept
+   every structural feature, significantly ([story.md](story.md#retracted-results-kept-on-purpose), "Retracted results, kept
    on purpose").
 3. **What the autopsy found** was worth more than the dream: the graphs
    themselves were the unmeasured variable. Precision ceiling 0.746; guarding

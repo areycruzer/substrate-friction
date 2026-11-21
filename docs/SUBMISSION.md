@@ -92,11 +92,11 @@ command or artifact; nothing requires trust.
 | The measurement is real | `data/shipped/gate-results.json` — 172 per-instance outcomes; recompute any cell by hand |
 | The product works on strangers' code | `friction triage https://github.com/fastapi/fastapi/pull/16159` — or read the dogfood PRs (#1–#4) this repo triaged on itself |
 | The engine use is real | `docs/engine-diff.md` — the headline anti-join executed inside HydraDB, parity with the offline result enforced by exception; engine-parity job on every PR |
-| The self-honesty is real | 3 falsified pre-registrations ([studies.md](studies.md)), 3 kept retractions (README §"Retracted results, kept on purpose"), a public upstream retraction ([hydradb#101](https://github.com/hydra-db/hydradb/issues/101)) |
+| The self-honesty is real | 3 falsified pre-registrations ([studies.md](studies.md)), 3 kept retractions ([story.md §"Retracted results, kept on purpose"](story.md#retracted-results-kept-on-purpose)), a public upstream retraction ([hydradb#101](https://github.com/hydra-db/hydradb/issues/101)) |
 | The self-assessment is calibrated | [docs/scorecard.md](scorecard.md) — 10 parameters, receipts per cell, and the sub-10 scores stated with their gaps |
 
-Rubric map: problem → README §60-second + [market.md](market.md) · built →
-README §What it is · demo → [walkthrough](https://areycruzer.github.io/substrate-friction/walkthrough.html) + video · HydraDB → README §How HydraDB is used ·
+Rubric map: problem → [story.md §60-second](story.md#the-60-second-version-no-jargon) + [market.md](market.md) · built →
+[story.md §What it is](story.md#what-it-is) · demo → [walkthrough](https://areycruzer.github.io/substrate-friction/walkthrough.html) + video · HydraDB → [story.md §How HydraDB is used](story.md#how-hydradb-is-used) ·
 results → [gate.md](gate.md) · originality → [longitudinal.md](longitudinal.md) + [related-work.md](related-work.md).
 
 ## (c) Pre-submit checklist

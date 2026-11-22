@@ -45,9 +45,10 @@ via edge reification; live gate replay with engine/offline parity enforced;
 four upstream filings (#81, #82, #101, #102) including a new engine-dialect
 finding (incoming variable-length MATCH rejected → materialised CALLED_BY).
 
-**Team contribution note:** solo participant; Claude (Anthropic) assisted in
-building and measuring, as attributed in the README. All commits inside the
-hackathon window; measurement scripts, artifacts and retractions committed.
+**Team contribution note:** built by Swyam Sharma with Jayati Ahuja, as
+credited in the README. Claude (Anthropic) assisted in building and measuring,
+as also attributed there. All commits inside the hackathon window; measurement
+scripts, artifacts and retractions committed.
 
 **Why this matters now (one sentence, for any "why you?" field):**
 The creator of Jenkins built a company on ML test-skipping and CloudBees
